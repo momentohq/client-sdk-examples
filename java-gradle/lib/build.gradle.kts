@@ -14,17 +14,15 @@ plugins {
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
+
+    maven("https://momento.jfrog.io/artifactory/maven-public")
 }
 
 dependencies {
+    implementation("momento.sandbox:momento-sdk-java-scs:0.1.0-SNAPSHOT")
+
     // Use JUnit Jupiter for testing.
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.2")
-
-    // This dependency is exported to consumers, that is to say found on their compile classpath.
-    api("org.apache.commons:commons-math3:3.6.1")
-
-    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation("com.google.guava:guava:30.1.1-jre")
 }
 
 tasks.test {
