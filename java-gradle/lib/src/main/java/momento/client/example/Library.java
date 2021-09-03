@@ -34,7 +34,7 @@ public class Library {
         // ------- Begin makeshift code --------
         // Hardcoded Cache ID Key
         String cacheId = "CacheId";
-        // Hardcoded Endoint, will not be needed and should just come from
+        // Hardcoded Endoint, will not be needed and should just come from getCache
         String endpoint = "beta.cacheservice.com";
         ScsClient cacheClient = new ScsClient(API_KEY, cacheId, Optional.empty(), endpoint);
         // ------- End makeshift code ---------
