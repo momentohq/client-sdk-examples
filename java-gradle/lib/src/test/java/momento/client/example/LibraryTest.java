@@ -5,12 +5,11 @@ package momento.client.example;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
 class LibraryTest {
   @Test
-  void someLibraryMethodReturnsTrue() throws IOException {
+  void someLibraryMethodReturnsTrue() {
     Library classUnderTest = new Library();
     assertTrue(classUnderTest.someLibraryMethod(), "someLibraryMethod should return 'true'");
   }
