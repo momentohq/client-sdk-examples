@@ -1,7 +1,6 @@
 package momento.client.example;
 
 import momento.sdk.Cache;
-import momento.sdk.Momento;
 import momento.sdk.exceptions.CacheServiceException;
 import momento.sdk.messages.CacheGetResponse;
 import momento.sdk.messages.MomentoCacheResult;
@@ -9,13 +8,6 @@ import momento.sdk.messages.MomentoCacheResult;
 public class CacheGet {
 
   private CacheGet() {}
-
-  public static void main(String[] args) {
-    Momento momento =
-        MomentoBuilder.getMomento(
-            MomentoConfiguration.getAuthToken(), MomentoConfiguration.getMomentoEndpoint());
-    Cache cache = momento.getCache(MomentoConfiguration.getMomentoCacheName());
-  }
 
   public static CacheGetResponse get(Cache cache, String key) {
     try {

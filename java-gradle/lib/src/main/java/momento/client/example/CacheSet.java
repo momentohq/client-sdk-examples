@@ -5,9 +5,9 @@ import momento.sdk.Momento;
 import momento.sdk.exceptions.CacheServiceException;
 import momento.sdk.messages.CacheSetResponse;
 
-public final class CacheGetAndSet {
+public final class CacheSet {
 
-  private CacheGetAndSet() {}
+  private CacheSet() {}
 
   public static Cache getCache(Momento momento, String cacheName) {
     return momento.getCache(cacheName);
