@@ -20,7 +20,7 @@ repositories {
 }
 
 dependencies {
-    implementation("momento.sandbox:momento-sdk-java-scs:0.1.0-SNAPSHOT")
+    implementation("momento.sandbox:momento-sdk:0.8.0")
 
     // Use JUnit Jupiter for testing.
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.2")
