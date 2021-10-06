@@ -35,7 +35,8 @@ public class MomentoCacheApplication {
     // Get what you set
     String getWhatYouSetKey = "MyFirstKey";
     String getWhatYouSetValue = "CacheMePlease";
-    cache.set(getWhatYouSetKey, getWhatYouSetValue, 10);
+    int ttl = 10; // second
+    cache.set(getWhatYouSetKey, getWhatYouSetValue, ttl);
     // Read the value and it must be a HIT!
     CacheGetResponse getWhatYouSet = cache.get(getWhatYouSetKey);
     assert getWhatYouSet.getResult() == MomentoCacheResult.Hit : "Expect Cache Hit, But was a Miss";
@@ -49,10 +50,8 @@ public class MomentoCacheApplication {
             getWhatYouSetValue, getWhatYouSet.asStringUtf8()));
 
     // Test TTL Enforcement
-    String enforceTTLKey = "EraseMeWhenItsDoneKey";
-    cache.set(enforceTTLKey, "I am Ephemeral", 1);
-    Thread.sleep(1000);
-    CacheGetResponse ttlResponse = cache.get(enforceTTLKey);
+    Thread.sleep(ttl * 1000); // millisecond
+    CacheGetResponse ttlResponse = cache.get(getWhatYouSetKey);
     assert ttlResponse.getResult() == MomentoCacheResult.Miss
         : "Item found, but it is past the TTL";
     System.out.println("Item dropped from Cache after expiry!");
