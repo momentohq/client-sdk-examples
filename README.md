@@ -29,7 +29,7 @@ To run:
 
 ```shell
 cd java-gradle/
-./gradlw run
+./gradlew run
 ```
 
 If you wish to open this example in an IntelliJ IDE, while opening the projecting point your IDE at `java-gradle/settings.gradle.kts`
