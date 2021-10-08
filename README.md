@@ -1,3 +1,5 @@
+# Java SDK Customer Onboarding
+
 # Working with Momento Cache Service
 
 ## Setting up
@@ -23,7 +25,7 @@ Modify the program to replace `"<YOUR TEST AUTH TOKEN>"` with your Momento Auth 
 private static final String MOMENTO_AUTH_TOKEN = "<YOUR TEST AUTH TOKEN>";
 ```
 
-If you wish to open this example in an IntelliJ IDE, while opening the projecting point your IDE to `java-gradle/settings.gradle.kts`
+If you wish to open this example in an IntelliJ IDE, while opening the projecting point your IDE at `java-gradle/settings.gradle.kts`
 
 ## Using the Java SDK in your project
 
@@ -31,13 +33,15 @@ If you wish to open this example in an IntelliJ IDE, while opening the projectin
 
 Update your Gradle build to include the components
 
+**build.gradle.kts**
+
 ```kotlin
 repositories {
     maven("https://momento.jfrog.io/artifactory/maven-public")
 }
 
 dependencies {
-    implementation("momento.sandbox:momento-sdk:0.8.0")
+    implementation("momento.sandbox:momento-sdk:0.10.0")
 }
 ```
 
@@ -63,6 +67,7 @@ Momento Client can be created using a static builder
 
     - `SdkClientException` if the provided `authToken` is null or empty
 
+
 - `CreateCacheResponse createCache(String cacheName)`
 
     Creates a Momento Cache with provided `cacheName` as an addressable name of the cache. Cache name is unique per `authToken`. `cacheName` is non-null, non-empty string with maximum length of 255 characters.
@@ -75,6 +80,7 @@ Momento Client can be created using a static builder
     - `InvalidArgumentException` if the cache name fails to meet the valid criteria
     - `InternalServerException` if Momento had an internal error while processing the create request.
 
+
 - `Cache getCache(String cacheName)`
 
     Creates a `momento.sdk.Cache` client that can be used to interact with a Momento Cache
@@ -85,6 +91,7 @@ Momento Client can be created using a static builder
     - `PermissionDeniedException` if `authToken` is invalid
     - `CacheNotFoundException` if a Momento Cache with `cacheName` doesn't exist
     - `InternalServerException` if Momento had an internal error while processing the request.
+
 
 **Interacting with Cache**
 
