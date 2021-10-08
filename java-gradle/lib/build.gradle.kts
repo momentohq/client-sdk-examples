@@ -7,8 +7,7 @@
  */
 
 plugins {
-    // Apply the java-library plugin for API and implementation separation.
-    `java-library`
+    `application`
     id("com.diffplug.spotless") version "5.15.1"
 }
 
@@ -36,4 +35,8 @@ spotless {
 tasks.test {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+}
+
+application {
+    mainClass.set("momento.client.example.MomentoCacheApplication")
 }

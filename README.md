@@ -25,6 +25,13 @@ Modify the program to replace `"<YOUR TEST AUTH TOKEN>"` with your Momento Auth 
 private static final String MOMENTO_AUTH_TOKEN = "<YOUR TEST AUTH TOKEN>";
 ```
 
+To run:
+
+```shell
+cd java-gradle/
+./gradlw run
+```
+
 If you wish to open this example in an IntelliJ IDE, while opening the projecting point your IDE at `java-gradle/settings.gradle.kts`
 
 ## Using the Java SDK in your project

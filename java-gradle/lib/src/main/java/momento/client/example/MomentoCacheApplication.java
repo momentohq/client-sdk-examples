@@ -12,6 +12,7 @@ public class MomentoCacheApplication {
   private static final String CACHE_NAME = "myCache";
 
   public static void main(String[] args) throws InterruptedException {
+    System.out.println("Running Momento Cache Application");
     run();
   }
 
@@ -19,12 +20,15 @@ public class MomentoCacheApplication {
     Momento momento = Momento.builder(MOMENTO_AUTH_TOKEN).build();
 
     // Create or Get Cache
+    System.out.println("Creating Cache with name: " + CACHE_NAME);
     try {
       momento.createCache(CACHE_NAME);
+      System.out.println("Successfully created Cache with name: " + CACHE_NAME);
     } catch (CacheAlreadyExistsException e) {
       // Cache already exists, so use it.
       System.out.println("Found a cache with name: " + CACHE_NAME);
     }
+    System.out.println("Initializing Cache Client for cache: " + CACHE_NAME);
     Cache cache = momento.getCache(CACHE_NAME);
 
     // Get what you set
