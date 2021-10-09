@@ -17,6 +17,10 @@ Send us an email at eng+onboarding@momentohq.com to request a Momento Auth Token
 
 ## **Experiment with the Example**
 
+### **Prerequisties**
+- JDK 16
+
+### **Running Examples**
 Example Code is available at `java-gradle/lib/src/main/java/momento/client/example/MomentoCacheApplication.java`
 
 Modify the program to replace `"<YOUR TEST AUTH TOKEN>"` with your Momento Auth Token.
