@@ -1,4 +1,4 @@
-# Java SDK Customer Onboarding
+# README.md
 
 # Working with Momento Cache Service
 
@@ -6,7 +6,7 @@
 
 ### Prerequisites
 
-To make requests to Momento using the Java SDK you need the following:
+To make requests to Momento using the Java SDK you need :
 
 - **Momento Auth Token**
 
@@ -17,11 +17,15 @@ Send us an email at eng+onboarding@momentohq.com to request a Momento Auth Token
 
 ## **Experiment with the Example**
 
-### **Prerequisties**
+### Prerequisite
+
 - JDK 16
 
-### **Running Examples**
-Example Code is available at `java-gradle/lib/src/main/java/momento/client/example/MomentoCacheApplication.java`
+### Running the Examples
+
+Example Code is available at
+
+`java-gradle/lib/src/main/java/momento/client/example/MomentoCacheApplication.java`
 
 Modify the program to replace `"<YOUR TEST AUTH TOKEN>"` with your Momento Auth Token.
 
@@ -29,14 +33,18 @@ Modify the program to replace `"<YOUR TEST AUTH TOKEN>"` with your Momento Auth 
 private static final String MOMENTO_AUTH_TOKEN = "<YOUR TEST AUTH TOKEN>";
 ```
 
-To run:
+**With Gradle**
 
-```shell
+```bash
 cd java-gradle/
 ./gradlew run
 ```
 
-If you wish to open this example in an IntelliJ IDE, while opening the projecting point your IDE at `java-gradle/settings.gradle.kts`
+**With IDE**
+
+You should be able to run this example using an IDE as well.
+
+If you wish to open this example in IntelliJ IDE, when opening the projecting point your IDE to `java-gradle/settings.gradle.kts`
 
 ## Using the Java SDK in your project
 
@@ -78,7 +86,6 @@ Momento Client can be created using a static builder
 
     - `SdkClientException` if the provided `authToken` is null or empty
 
-
 - `CreateCacheResponse createCache(String cacheName)`
 
     Creates a Momento Cache with provided `cacheName` as an addressable name of the cache. Cache name is unique per `authToken`. `cacheName` is non-null, non-empty string with maximum length of 255 characters.
@@ -91,7 +98,6 @@ Momento Client can be created using a static builder
     - `InvalidArgumentException` if the cache name fails to meet the valid criteria
     - `InternalServerException` if Momento had an internal error while processing the create request.
 
-
 - `Cache getCache(String cacheName)`
 
     Creates a `momento.sdk.Cache` client that can be used to interact with a Momento Cache
@@ -102,7 +108,6 @@ Momento Client can be created using a static builder
     - `PermissionDeniedException` if `authToken` is invalid
     - `CacheNotFoundException` if a Momento Cache with `cacheName` doesn't exist
     - `InternalServerException` if Momento had an internal error while processing the request.
-
 
 **Interacting with Cache**
 
