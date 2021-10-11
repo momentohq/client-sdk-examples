@@ -40,6 +40,7 @@ public class MomentoCacheApplication {
       // Test TTL Enforcement
       System.out.println("");
       System.out.println("Checking TTL Enforcement");
+      System.out.println("Sleeping for " + ttl + " seconds!");
       Thread.sleep(ttl * 1000); // millisecond
       // Read the value and it must be a MISS!
       CacheGetResponse ttlResponse = cache.get(getWhatYouSetKey);
