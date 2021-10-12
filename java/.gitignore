@@ -6,3 +6,9 @@ build
 
 # Ignore IDE
 .idea
+.project
+.settings
+lib/.settings
+lib/.classpath
+lib/.project
+lib/bin

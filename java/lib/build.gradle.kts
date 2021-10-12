@@ -7,8 +7,7 @@
  */
 
 plugins {
-    // Apply the java-library plugin for API and implementation separation.
-    `java-library`
+    `application`
     id("com.diffplug.spotless") version "5.15.1"
 }
 
@@ -20,7 +19,7 @@ repositories {
 }
 
 dependencies {
-    implementation("momento.sandbox:momento-sdk:0.8.0")
+    implementation("momento.sandbox:momento-sdk:0.12.0")
 
     // Use JUnit Jupiter for testing.
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.2")
@@ -36,4 +35,8 @@ spotless {
 tasks.test {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+}
+
+application {
+    mainClass.set("momento.client.example.MomentoCacheApplication")
 }
