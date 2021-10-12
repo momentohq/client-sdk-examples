@@ -18,7 +18,7 @@ public class MomentoCacheApplication {
       try (Cache cache = momento.createOrGetCache(CACHE_NAME)) {
         cache.set(KEY, VALUE, ITEM_TTL_SECONDS); // key -> value with 10 second TTL
         String resp = cache.get(KEY).asStringUtf8().get();
-        assert resp.equals(resp);
+        assert resp.equals(VALUE);
       }
     }
   }
