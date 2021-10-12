@@ -12,7 +12,7 @@ public class MomentoCacheApplication {
   private static final int ITEM_TTL_SECONDS = 10;
 
   public static void main(String[] args) {
-    System.out.println("Running Momento Cache Application");
+    System.out.println("Running Momento Cache Demo Application");
 
     try(Momento momento = Momento.builder(MOMENTO_AUTH_TOKEN).build()) {
       try(Cache cache = momento.createOrGetCache(CACHE_NAME)) {
