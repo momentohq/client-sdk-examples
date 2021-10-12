@@ -22,9 +22,16 @@ public class MomentoCacheApplication {
       String getWhatYouSetKey = "MyFirstKey";
       String getWhatYouSetValue = "CacheMePlease";
       int ttl = 10; // second
+      System.out.println(
+          String.format(
+              "Storing Item key: %s , value: %s with ttlSeconds: %d in the Cache",
+              getWhatYouSetKey, getWhatYouSetValue, ttl));
       cache.set(getWhatYouSetKey, getWhatYouSetValue, ttl);
 
       // Read the value and it must be a HIT!
+      System.out.println(
+          String.format("Looking up item with Key: %s from the Cache", getWhatYouSetKey));
+
       CacheGetResponse getWhatYouSet = cache.get(getWhatYouSetKey);
       assert getWhatYouSet.result() == MomentoCacheResult.Hit : "Expect Cache Hit, But was a Miss";
       System.out.println("Cache Hit!!");
@@ -32,6 +39,7 @@ public class MomentoCacheApplication {
           : String.format(
               "Expected value `%s` but found `%s`",
               getWhatYouSetValue, getWhatYouSet.asStringUtf8());
+
       System.out.println(
           String.format(
               "Expected value `%s` ==  Looked up value `%s`",
@@ -43,11 +51,13 @@ public class MomentoCacheApplication {
       System.out.println("Sleeping for " + ttl + " seconds!");
       Thread.sleep(ttl * 1000); // millisecond
       // Read the value and it must be a MISS!
+
+      System.out.println(String.format("Looking item with key: %s", getWhatYouSetKey));
       CacheGetResponse ttlResponse = cache.get(getWhatYouSetKey);
       assert ttlResponse.result() == MomentoCacheResult.Miss : "Item found, but it is past the TTL";
       assert ttlResponse.asStringUtf8().isPresent() == false
           : "Item value found, but it shouldn't be present";
-      System.out.println("Item dropped from Cache after expiry!");
+      System.out.println("Cache Miss! Item was dropped from the Cache after expiry!");
     }
   }
 
