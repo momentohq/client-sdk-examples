@@ -27,7 +27,7 @@ Send us an email at [support@momentohq.com](mailto:support@momentohq.com) to req
 MOMENTO_AUTH_TOKEN=<YOUR AUTH TOKEN> ./gradlew run
 ```
 
-Example Code: [MomentoCacheApplication.java](java/lib/src/main/java/momento/client/example/MomentoCacheApplication.java)
+Example Code: [MomentoCacheApplication.java](lib/src/main/java/momento/client/example/MomentoCacheApplication.java)
 
 ## Using the Java SDK in your project
 
