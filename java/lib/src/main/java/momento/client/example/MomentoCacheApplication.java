@@ -13,7 +13,6 @@ public class MomentoCacheApplication {
 
   public static void main(String[] args) {
     System.out.println("Running Momento Cache Demo Application");
-
     try (Momento momento = Momento.builder(MOMENTO_AUTH_TOKEN).build()) {
       try (Cache cache = momento.createOrGetCache(CACHE_NAME)) {
         cache.set(KEY, VALUE, ITEM_TTL_SECONDS); // key -> value with 10 second TTL
