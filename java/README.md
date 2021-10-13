@@ -29,7 +29,7 @@ cd java/
 MOMENTO_AUTH_TOKEN=<YOUR AUTH TOKEN> ./gradlew run
 ```
 
-Example Code: [MomentoApplication](lib/src/main/java/momento/client/example/MomentoCacheApplication.java)
+Example Code: [MomentoApplication.java](lib/src/main/java/momento/client/example/MomentoCacheApplication.java)
 
 ## Using the Java SDK in your project
 
@@ -45,7 +45,7 @@ repositories {
 }
 
 dependencies {
-    implementation("momento.sandbox:momento-sdk:0.12.0")
+    implementation("momento.sandbox:momento-sdk:0.13.0")
 }
 ```
 
