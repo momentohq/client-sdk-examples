@@ -1,4 +1,4 @@
-# README.md
+# README
 
 # Working with Momento Cache Service
 
@@ -19,16 +19,17 @@ Send us an email at [support@momentohq.com](mailto:support@momentohq.com) to req
 
 ### Before you get started
 
-- JDK 16 or above
+- JDK 11 or above is required to run the example
 - You do not need gradle to be installed
 
 ### Running the Example
 
 ```bash
+cd java/
 MOMENTO_AUTH_TOKEN=<YOUR AUTH TOKEN> ./gradlew run
 ```
 
-Example Code: [MomentoCacheApplication.java](lib/src/main/java/momento/client/example/MomentoCacheApplication.java)
+Example Code: [MomentoApplication](lib/src/main/java/momento/client/example/MomentoCacheApplication.java)
 
 ## Using the Java SDK in your project
 
@@ -44,7 +45,7 @@ repositories {
 }
 
 dependencies {
-    implementation("momento.sandbox:momento-sdk:0.10.0")
+    implementation("momento.sandbox:momento-sdk:0.12.0")
 }
 ```
 
@@ -68,7 +69,7 @@ Momento Client can be created using a static builder
 
   **throws**
 
-    - `SdkClientException` if the provided `authToken` is null or empty
+  - `SdkClientException` if the provided `authToken` is null or empty
 
 - `CreateCacheResponse createCache(String cacheName)`
 
@@ -76,11 +77,11 @@ Momento Client can be created using a static builder
 
   **throws**
 
-    - `SdkClientException` if the cacheName is null
-    - `PermissionDeniedException` if the provided `authToken` is invalid
-    - `CacheAlreadyExistsException` if a cache with the same name already exists
-    - `InvalidArgumentException` if the cache name fails to meet the valid criteria
-    - `InternalServerException` if Momento had an internal error while processing the create request.
+  - `SdkClientException` if the cacheName is null
+  - `PermissionDeniedException` if the provided `authToken` is invalid
+  - `CacheAlreadyExistsException` if a cache with the same name already exists
+  - `InvalidArgumentException` if the cache name fails to meet the valid criteria
+  - `InternalServerException` if Momento had an internal error while processing the create request.
 
 - `Cache getCache(String cacheName)`
 
@@ -88,10 +89,21 @@ Momento Client can be created using a static builder
 
   **throws**
 
-    - `SdkClientException` if provided cacheName is null
-    - `PermissionDeniedException` if `authToken` is invalid
-    - `CacheNotFoundException` if a Momento Cache with `cacheName` doesn't exist
-    - `InternalServerException` if Momento had an internal error while processing the request.
+  - `SdkClientException` if provided cacheName is null
+  - `PermissionDeniedException` if `authToken` is invalid
+  - `CacheNotFoundException` if a Momento Cache with `cacheName` doesn't exist
+  - `InternalServerException` if Momento had an internal error while processing the request.
+
+- `Cache getOrCreateCache(String cacheName)`
+
+  Creates a `momento.sdk.Cache` client that can be used to interact with a Momento Cache
+
+  **throws**
+
+  - `SdkClientException` if provided cacheName is null
+  - `PermissionDeniedException` if `authToken` is invalid
+  - `CacheNotFoundException` if a Momento Cache with `cacheName` doesn't exist
+  - `InternalServerException` if Momento had an internal error while processing the request.
 
 **Interacting with Cache**
 
@@ -109,9 +121,9 @@ Momento Client can be created using a static builder
 
   **throws**
 
-    - `SdkClientException` if `key` or `value` is null or `ttlSeconds` is ≤ 0
-    - `PermissionDeniedException` if `authToken` used for making the request is invalid
-    - `CacheNotFoundException` if target cache on which sets are being made is not found. This may arise if the Cache was deleted after the `momento.sdk.Cache` was created
+  - `SdkClientException` if `key` or `value` is null or `ttlSeconds` is ≤ 0
+  - `PermissionDeniedException` if `authToken` used for making the request is invalid
+  - `CacheNotFoundException` if target cache on which sets are being made is not found. This may arise if the Cache was deleted after the `momento.sdk.Cache` was created
 
   **Other variations**
 
@@ -138,21 +150,21 @@ Momento Client can be created using a static builder
 
   Response object that encapsulates the result of the get request.
 
-    - `momento.sdk.messages.MomentoCacheResult result()`
+  - `momento.sdk.messages.MomentoCacheResult result()`
 
-      Encapsulates `Hit` and `Miss` to indicate wether the request made resulted in a cache hit or not.
+    Encapsulates `Hit` and `Miss` to indicate wether the request made resulted in a cache hit or not.
 
-    - Also exposes values as `Optional<>`, will `Optional<>.empty()` if there is no cache `Hit`
-        - `Optional<byte[]> asByteArray()`
-        - `Optional<ByteBuffer> asByteBuffer()`
-        - `Optional<String> asStringUtf8()`
-        - `Optional<String> asString(java.nio.charset.Charset charset)`
+  - Also exposes values as `Optional<>`, will `Optional<>.empty()` if there is no cache `Hit`
+    - `Optional<byte[]> byteArray()`
+    - `Optional<ByteBuffer> byteBuffer()`
+    - `Optional<String> string()`
+    - `Optional<String> string(java.nio.charset.Charset charset)`
 
   **throws**
 
-    - `SdkClientException` if `key` or `value` is null or `ttlSeconds` is ≤ 0
-    - `PermissionDeniedException` if `authToken` used for making the request is invalid
-    - `CacheNotFoundException` if target cache on which sets are being made is not found. This may arise if the Cache was deleted after the `momento.sdk.Cache` was created
+  - `SdkClientException` if `key` or `value` is null or `ttlSeconds` is ≤ 0
+  - `PermissionDeniedException` if `authToken` used for making the request is invalid
+  - `CacheNotFoundException` if target cache on which sets are being made is not found. This may arise if the Cache was deleted after the `momento.sdk.Cache` was created
 
   **Other variations**
 

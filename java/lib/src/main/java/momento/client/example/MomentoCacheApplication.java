@@ -14,9 +14,9 @@ public class MomentoCacheApplication {
   public static void main(String[] args) {
     System.out.println("Running Momento Cache Demo Application");
     try (Momento momento = Momento.builder(MOMENTO_AUTH_TOKEN).build()) {
-      try (Cache cache = momento.createOrGetCache(CACHE_NAME)) {
+      try (Cache cache = momento.getOrCreateCache(CACHE_NAME)) {
         cache.set(KEY, VALUE, ITEM_TTL_SECONDS);
-        String resp = cache.get(KEY).asStringUtf8().get();
+        String resp = cache.get(KEY).string().get();
         assert resp.equals(VALUE);
       }
     }
