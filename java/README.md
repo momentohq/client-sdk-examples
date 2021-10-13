@@ -17,9 +17,10 @@ Send us an email at [support@momentohq.com](mailto:support@momentohq.com) to req
 
 ## **Experiment with the Example**
 
-### Prerequisite
+### Before you get started
 
-- JDK 16+
+- JDK 16 or above
+- You do not need gradle to be installed
 
 ### Running the Example
 
