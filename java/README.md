@@ -17,11 +17,14 @@ Send us an email at [support@momentohq.com](mailto:support@momentohq.com) to req
 
 ## **Experiment with the Example**
 
-### Prerequisite
+### Before you get started
 
-- JDK 16+
+- JDK 16 or above
+- You do not need gradle to be installed
 
 ### Running the Example
+
+From the client-sdk-examples/java folder run the following:
 
 ```bash
 MOMENTO_AUTH_TOKEN=<YOUR AUTH TOKEN> ./gradlew run
