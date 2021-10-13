@@ -24,8 +24,6 @@ Send us an email at [support@momentohq.com](mailto:support@momentohq.com) to req
 
 ### Running the Example
 
-From the client-sdk-examples/java folder run the following:
-
 ```bash
 MOMENTO_AUTH_TOKEN=<YOUR AUTH TOKEN> ./gradlew run
 ```
