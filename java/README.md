@@ -152,9 +152,9 @@ Momento Client can be created using a static builder
 
   - `momento.sdk.messages.MomentoCacheResult result()`
 
-    Encapsulates `Hit` and `Miss` to indicate wether the request made resulted in a cache hit or not.
+    Encapsulates `Hit` and `Miss` to indicate whether the request resulted in a cache hit or not.
 
-  - Also exposes values as `Optional<>`, will `Optional<>.empty()` if there is no cache `Hit`
+  - Also exposes values as `Optional<>`, will be `Optional<>.empty()` if there is no cache `Hit`
     - `Optional<byte[]> byteArray()`
     - `Optional<ByteBuffer> byteBuffer()`
     - `Optional<String> string()`
