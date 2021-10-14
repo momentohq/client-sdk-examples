@@ -15,10 +15,16 @@ public class MomentoCacheApplication {
     System.out.println("Running Momento Cache Demo Application");
     try (Momento momento = Momento.builder(MOMENTO_AUTH_TOKEN).build()) {
       try (Cache cache = momento.getOrCreateCache(CACHE_NAME)) {
+        System.out.println(
+            String.format("Storing key=%s value=%s w/ ttl=%ds", KEY, VALUE, ITEM_TTL_SECONDS));
         cache.set(KEY, VALUE, ITEM_TTL_SECONDS);
+        System.out.println(String.format("Looking up item for key=%s ", KEY));
         String resp = cache.get(KEY).string().get();
         assert resp.equals(VALUE);
+        System.out.println(
+            String.format("storedValue=%s is equal to lookedUpValue=%s ", VALUE, resp));
       }
     }
+    System.out.println("Momento Cache Demo Application Done.");
   }
 }
