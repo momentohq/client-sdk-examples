@@ -1,0 +1,19 @@
+{
+  "name": "momento-typescript-example",
+  "version": "1.0.0",
+  "description": "Getting started with Momento sdk",
+  "main": "index.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node index.js"
+  },
+  "type": "module",
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "4.4.3"
+  },
+  "dependencies": {
+    "@momento/client-sdk-typescript": "0.1.6"
+  }
+}
