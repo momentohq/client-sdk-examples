@@ -30,7 +30,7 @@ npm config set @momento:registry https://momento.jfrog.io/artifactory/npm-public
 cd typescript
 npm install
 npm run build
-MOMENTO_AUTH_TOKEN=<YOUR AUTH TOKEN> npm run start
+MOMENTO_AUTH_TOKEN=<YOUR AUTH TOKEN> npm run example
 ```
 
 Example Code: [index.ts](index.ts)
@@ -71,4 +71,12 @@ const key = new Uint8Array([109,111,109,101,110,116,111])
 const value = new Uint8Array([109,111,109,101,110,116,111,32,105,115,32,97,119,101,115,111,109,101,33,33,33])
 await cache.setBytes(key, value, 50)
 await cache.getBytes(key)
+```
+
+Handling cache misses
+```typescript
+const res = await cache.get("non-existent key")
+if (res.result === MomentoCacheResult.Miss) {
+    console.log("cache miss")
+}
 ```
