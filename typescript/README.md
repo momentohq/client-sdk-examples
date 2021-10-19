@@ -40,13 +40,13 @@ Example Code: [index.ts](index.ts)
 ### Installation
 ```bash
 npm config set @momento:registry https://momento.jfrog.io/artifactory/npm-public/
-npm install @momento/client-sdk-typescript
+npm install @momento/sdk
 ```
 
 ### Usage
 
 ```typescript
-import {Momento, MomentoCacheResult} from "@momento/client-sdk-typescript";
+import {Momento, MomentoCacheResult} from "@momento/sdk";
 
 // your authentication token for momento
 const authToken = process.env.MOMENTO_AUTH_TOKEN
@@ -55,11 +55,17 @@ const authToken = process.env.MOMENTO_AUTH_TOKEN
 const momento = new Momento(authToken);
 
 // creating a cache named "myCache", and subsequently returning it
-const cache = await momento.createOrGetCache("myCache")
+const cache = await momento.createOrGetCache("myCache", {
+    defaultTtlSeconds: 100
+})
 
-await cache.set("key", "value", 5)
+// sets key with default ttl
+await cache.set("key", "value")
 const res = await cache.get("key")
 console.log("result: ", res.text())
+
+// sets key with ttl of 5 seconds
+await cache.set("key2", "value2", 5)
 
 // permantently deletes cache
 await momento.deleteCache("myCache")

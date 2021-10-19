@@ -1,4 +1,4 @@
-import {Momento} from '@momento/client-sdk-typescript';
+import {Momento} from '@momento/sdk';
 
 const cacheName = "cache2"
 const cacheKey = "key"
@@ -12,7 +12,9 @@ if (!authToken) {
 const momento = new Momento(authToken);
 
 const main = async () => {
-    const cache = await momento.createOrGetCache(cacheName);
+    const cache = await momento.createOrGetCache(cacheName, {
+        defaultTtlSeconds: 100
+    });
     console.log(`Storing key=${cacheKey}, value=${cacheValue}, ttl=${ttl}`)
     await cache.set(cacheKey, cacheValue, ttl)
     const getResp = await cache.get(cacheKey)
