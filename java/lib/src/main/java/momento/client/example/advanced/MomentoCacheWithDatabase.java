@@ -29,6 +29,27 @@ public class MomentoCacheWithDatabase {
     }
   }
 
+  private static void runExample(Cache cache, Database database) {
+    for (String itemId : itemIds) {
+      System.out.println(String.format("Initiating Lookup for item id: %s", itemId));
+      String result = lookup(itemId, cache, database).orElse(ITEM_NOT_FOUND_MESSAGE);
+      System.out.println(String.format("Item id: %s Item: %s", itemId, result));
+
+      // Item was found in Database or Cache the second look up should be a cache hit.
+      if (!result.equals(ITEM_NOT_FOUND_MESSAGE)) {
+        System.out.println(String.format("\n \nLookup Item id: %s again.", itemId));
+
+        String secondLookup =
+                lookup(itemId, cache, database)
+                        .orElseThrow(
+                                () -> new AssertionError("Item should be present."));
+        System.out.println(String.format("Look up for Item id: %s Item: %s", itemId, secondLookup));
+      }
+
+      System.out.println(String.format("Done looking up item id: %s \n \n", itemId));
+    }
+  }
+
   // Handle cache lookups and fallback to database when item isn't found
   private static Optional<String> lookup(String itemId, Cache cache, Database database) {
     CacheGetResponse response = cache.get(itemId);
@@ -47,25 +68,6 @@ public class MomentoCacheWithDatabase {
               "Item stored with key: %s and value: %s stored in Cache", itemId, item.get()));
     }
     return item;
-  }
-
-  private static void runExample(Cache cache, Database database) {
-    for (String itemId : itemIds) {
-      System.out.println(String.format("Initiating Lookup for item id: %s", itemId));
-      String result = lookup(itemId, cache, database).orElse(ITEM_NOT_FOUND_MESSAGE);
-      System.out.println(String.format("Item id: %s Item: %s", itemId, result));
-
-      // Item was found in Database or Cache the second look up should be a cache hit.
-      if (!result.equals(ITEM_NOT_FOUND_MESSAGE)) {
-        System.out.println(String.format("\n \nLookup Item id: %s again.", itemId));
-        String secondLookup =
-            lookup(itemId, cache, database)
-                .orElseThrow(
-                    () -> new AssertionError("Expected to find item but item wasn't found."));
-        System.out.println(String.format("Look up for Item id: %s Item: %s", itemId, secondLookup));
-      }
-      System.out.println(String.format("Done looking up item id: %s \n \n", itemId));
-    }
   }
 
   private static void writeCacheLog(CacheGetResponse response, String key) {
