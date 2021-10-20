@@ -53,11 +53,11 @@ public class MomentoCacheWithDatabase {
     for (String itemId : itemIds) {
       System.out.println(String.format("Initiating Lookup for item id: %s", itemId));
       String result = lookup(itemId, cache, database).orElse(ITEM_NOT_FOUND_MESSAGE);
-      System.out.println(String.format("Item id: %s Item: %s \n \n", itemId, result));
+      System.out.println(String.format("Item id: %s Item: %s", itemId, result));
 
       // Item was found in Database or Cache the second look up should be a cache hit.
       if (!result.equals(ITEM_NOT_FOUND_MESSAGE)) {
-        System.out.println(String.format("Lookup Item id: %s again.", itemId));
+        System.out.println(String.format("\n \nLookup Item id: %s again.", itemId));
         String secondLookup =
             lookup(itemId, cache, database)
                 .orElseThrow(
