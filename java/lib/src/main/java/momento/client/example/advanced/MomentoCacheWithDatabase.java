@@ -15,7 +15,7 @@ import momento.sdk.messages.CacheGetResponse;
  */
 public class MomentoCacheWithDatabase {
 
-  private static final String MOMENTO_AUTH_TOKEN = "<TOKEN HERE>";
+  private static final String MOMENTO_AUTH_TOKEN = "<YOUR TOKEN HERE>";
   private static final String CACHE_NAME = "cache";
   private static final String ITEM_NOT_FOUND_MESSAGE = "Not Found in Cache or Database";
   private static final List<String> itemIds = Arrays.asList("1", "20");
@@ -53,7 +53,7 @@ public class MomentoCacheWithDatabase {
     for (String itemId : itemIds) {
       System.out.println(String.format("Initiating Lookup for item id: %s", itemId));
       String result = lookup(itemId, cache, database).orElse(ITEM_NOT_FOUND_MESSAGE);
-      System.out.println(String.format("Look up for Item id: %s Item: %s", itemId, result));
+      System.out.println(String.format("Item id: %s Item: %s \n \n", itemId, result));
 
       // Item was found in Database or Cache the second look up should be a cache hit.
       if (!result.equals(ITEM_NOT_FOUND_MESSAGE)) {
