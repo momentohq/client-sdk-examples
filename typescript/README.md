@@ -4,7 +4,7 @@
 
 ### Prerequisites
 
-To make requests to Momento using the Java SDK you need :
+To make requests to Momento using the Javascript SDK you need :
 
 - **Momento Auth Token**
 
@@ -21,7 +21,7 @@ Send us an email at [support@momentohq.com](mailto:support@momentohq.com) to req
 - Set your npm registry with the following command
 
 ```bash
-npm config set @momento:registry https://momento.jfrog.io/artifactory/npm-public/
+npm config set @momento:registry https://momento.jfrog.io/artifactory/api/npm/npm-public/
 ```
 
 ### Running the Example
