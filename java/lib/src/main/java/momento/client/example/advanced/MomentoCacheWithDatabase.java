@@ -5,6 +5,14 @@ import momento.sdk.Cache;
 import momento.sdk.Momento;
 import momento.sdk.messages.CacheGetResponse;
 
+/**
+ * Example application that shows how to handle Cache lookups and cache misses.
+ *
+ * <p>An in-memory hashmap based database stores items(item_id, item_name). The example looks to
+ * fetch a given item from cache first. If it is hit, it returns the data. On a cache miss, attempts
+ * to read data from Database and then add the data to cache. Any future lookups within the bounds
+ * set by TTL will result in a cache hit.
+ */
 public class MomentoCacheWithDatabase {
 
   private static final String MOMENTO_AUTH_TOKEN = "<TOKEN HERE>";
