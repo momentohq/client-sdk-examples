@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  typescript:
+    runs-on: ubuntu-latest
+    env:
+      TEST_AUTH_TOKEN: ${{ secrets.ALPHA_TEST_AUTH_TOKEN }}
+      TEST_CACHE_NAME: dummy
+
+    steps:
+      - name: Setup repo
+        uses: actions/checkout@v2
+
+      - name: Install Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16
+          
+      - name: Configure Artifactory credentials
+        run: |
+          # lel this is how jfrog wants you to come up with your scoped npm configuration
+          echo @momento:registry=https://momento.jfrog.io/artifactory/api/npm/npm-public/ >> ~/.npmrc
+
+      - name: cd typescript directory
+        run: |
+          pushd typescript
+          
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
