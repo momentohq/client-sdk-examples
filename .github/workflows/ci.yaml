@@ -28,6 +28,7 @@ jobs:
       - name: cd typescript directory
         run: |
           pushd typescript
+          ls
           
       - name: Install Dependencies
         run: npm ci
