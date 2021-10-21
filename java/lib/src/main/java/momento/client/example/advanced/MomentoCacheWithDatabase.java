@@ -1,6 +1,10 @@
 package momento.client.example.advanced;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import momento.sdk.Cache;
 import momento.sdk.Momento;
 import momento.sdk.messages.CacheGetResponse;
@@ -40,9 +44,8 @@ public class MomentoCacheWithDatabase {
         System.out.println(String.format("\n \nLookup Item id: %s again.", itemId));
 
         String secondLookup =
-                lookup(itemId, cache, database)
-                        .orElseThrow(
-                                () -> new AssertionError("Item should be present."));
+            lookup(itemId, cache, database)
+                .orElseThrow(() -> new AssertionError("Item should be present."));
         System.out.println(String.format("Look up for Item id: %s Item: %s", itemId, secondLookup));
       }
 
