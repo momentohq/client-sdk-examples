@@ -5,15 +5,18 @@
   "main": "index.ts",
   "scripts": {
     "build": "tsc",
-    "example": "node index.js"
+    "example": "babel-node index.js"
   },
   "type": "module",
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@babel/core": "^7.15.8",
+    "@babel/node": "^7.15.8",
+    "@babel/preset-env": "^7.15.8",
     "typescript": "4.4.3"
   },
   "dependencies": {
-    "@momento/sdk": "0.2.1"
+    "@momento/sdk": "^0.2.1"
   }
 }

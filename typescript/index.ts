@@ -1,4 +1,4 @@
-import {Momento} from '@momento/sdk';
+import { Momento } from '@momento/sdk';
 
 const cacheName = "cache2"
 const cacheKey = "key"
@@ -18,7 +18,7 @@ const main = async () => {
     console.log(`Storing key=${cacheKey}, value=${cacheValue}, ttl=${ttl}`)
     await cache.set(cacheKey, cacheValue, ttl)
     const getResp = await cache.get(cacheKey)
-    console.log(`result: ${getResp.text()}`)
+    console.log(`result: `, getResp)
 }
 
 main().then(() => {
