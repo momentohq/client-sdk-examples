@@ -21,4 +21,8 @@ const main = async () => {
     console.log(`result: ${getResp.text()}`)
 }
 
-main()
+main().then(() => {
+    console.log("success!!")
+}).catch((e) => {
+    console.error("failed to get from cache", e)
+})
