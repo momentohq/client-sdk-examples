@@ -25,12 +25,9 @@ jobs:
           # lel this is how jfrog wants you to come up with your scoped npm configuration
           echo @momento:registry=https://momento.jfrog.io/artifactory/api/npm/npm-public/ >> ~/.npmrc
 
-      - name: cd typescript directory
+      - name: Install Deps and Build
         run: |
           pushd typescript
-          
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build
+            npm ci
+            npm run build
+          popd
