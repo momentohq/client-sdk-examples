@@ -1,39 +1,20 @@
-# Working with Momento Cache Service
-
-## Setting up
-
-### Prerequisites
-
-To make requests to Momento using the Javascript SDK you need :
-
-- **Momento Auth Token**
-
-  Momento Auth Token is required to authenticate with the Momento Cache Service. This token uniquely identifies cache interactions. The token should be treated like a sensitive password and all essential care must be taken to ensure its secrecy. We recommend that you store this token in a secret vault like AWS Secrets Manager.
-
-
-Send us an email at [support@momentohq.com](mailto:support@momentohq.com) to request a Momento Auth Token.
-
-## **Experiment with the Example**
-
-### Before you get started
+## Running the Example
 
 - Node version 14 or higher is required
-- Set your npm registry with the following command
 
 ```bash
+# Set your npm registry
 npm config set @momento:registry https://momento.jfrog.io/artifactory/api/npm/npm-public/
-```
-
-### Running the Example
-
-```bash
 cd typescript
 npm install
 npm run build
+
+# Run example code
 MOMENTO_AUTH_TOKEN=<YOUR AUTH TOKEN> npm run example
 ```
 
 Example Code: [index.ts](index.ts)
+- Send us an email at [support@momentohq.com](mailto:support@momentohq.com) to request a Momento Auth Token. It is required to authenticate with the Momento Cache Service. This token uniquely identifies cache interactions. The token should be treated like a sensitive password and all essential care must be taken to ensure its secrecy. We recommend that you store this token in a secret vault like AWS Secrets Manager.
 
 ## Using the sdk in your projects
 
