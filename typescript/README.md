@@ -1,6 +1,6 @@
 ## Running the Example
 
-- Node version 14 or higher is required
+- Node version 10.13 or higher is required
 
 ```bash
 # Set your npm registry
