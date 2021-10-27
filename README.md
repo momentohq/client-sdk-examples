@@ -2,3 +2,5 @@
 Example code for consuming momento SDK
 
 ## [Java Examples](java/)
+
+## [Javascript Examples](typescript/)
