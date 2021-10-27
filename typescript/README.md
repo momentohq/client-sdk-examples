@@ -70,8 +70,8 @@ if (res.result === MomentoCacheResult.Miss) {
 
 Storing Files
 ```typescript
-const b = fs.readFileSync("./package.json");
-const filebytes = Uint8Array.from(b);
+const buffer = fs.readFileSync("./package.json");
+const filebytes = Uint8Array.from(buffer);
 const cacheKey = new TextEncoder().encode("cache key");
 
 // store file in cache
