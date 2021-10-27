@@ -23,11 +23,13 @@ public class MomentoCacheWithDatabase {
   private static final String CACHE_NAME = "cache";
   private static final String ITEM_NOT_FOUND_MESSAGE = "Not Found in Cache or Database";
   private static final List<String> itemIds = Arrays.asList("1", "20");
+  private static final int DEFAULT_ITEM_TTL = 60;
 
   public static void main(String[] args) {
     Database database = new DatabaseImpl();
     try (Momento momento = Momento.builder(MOMENTO_AUTH_TOKEN).build()) {
-      try (Cache cache = momento.getOrCreateCache(CACHE_NAME)) {
+      try (Cache cache =
+          momento.cacheBuilder(CACHE_NAME, DEFAULT_ITEM_TTL).createCacheIfDoesntExist().build()) {
         runExample(cache, database);
       }
     }
@@ -65,7 +67,7 @@ public class MomentoCacheWithDatabase {
   private static Optional<String> handleCacheMiss(String itemId, Cache cache, Database database) {
     Optional<String> item = database.getItem(itemId);
     if (item.isPresent()) {
-      cache.set(itemId, item.get(), 60);
+      cache.set(itemId, item.get());
       System.out.println(
           String.format(
               "Item stored with key: %s and value: %s stored in Cache", itemId, item.get()));

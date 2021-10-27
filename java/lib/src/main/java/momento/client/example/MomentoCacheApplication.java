@@ -14,7 +14,8 @@ public class MomentoCacheApplication {
   public static void main(String[] args) {
     System.out.println("Running Momento Cache Demo Application");
     try (Momento momento = Momento.builder(MOMENTO_AUTH_TOKEN).build()) {
-      try (Cache cache = momento.getOrCreateCache(CACHE_NAME)) {
+      try (Cache cache =
+          momento.cacheBuilder(CACHE_NAME, ITEM_TTL_SECONDS).createCacheIfDoesntExist().build()) {
         System.out.println(
             String.format("Storing key=%s value=%s w/ ttl=%ds", KEY, VALUE, ITEM_TTL_SECONDS));
         cache.set(KEY, VALUE, ITEM_TTL_SECONDS);
