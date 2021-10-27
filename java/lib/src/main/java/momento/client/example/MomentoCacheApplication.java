@@ -18,7 +18,7 @@ public class MomentoCacheApplication {
           momento.cacheBuilder(CACHE_NAME, ITEM_TTL_SECONDS).createCacheIfDoesntExist().build()) {
         System.out.println(
             String.format("Storing key=%s value=%s w/ ttl=%ds", KEY, VALUE, ITEM_TTL_SECONDS));
-        cache.set(KEY, VALUE, ITEM_TTL_SECONDS);
+        cache.set(KEY, VALUE);
         System.out.println(String.format("Looking up item for key=%s ", KEY));
         String resp = cache.get(KEY).string().get();
         assert resp.equals(VALUE);
