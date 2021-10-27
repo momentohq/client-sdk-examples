@@ -67,3 +67,19 @@ if (res.result === MomentoCacheResult.Miss) {
     console.log("cache miss")
 }
 ```
+
+Storing Files
+```typescript
+const b = fs.readFileSync("./package.json");
+const filebytes = Uint8Array.from(b);
+const cacheKey = new TextEncoder().encode("cache key");
+
+// store file in cache
+await cache.setBytes(cacheKey, filebytes);
+
+// retrieve file from cache
+const getResp = await cache.getBytes(cacheKey);
+
+// write file to disk
+fs.writeFileSync('./package2.json', Buffer.from(getResp.body));
+```
