@@ -48,7 +48,7 @@ console.log("result: ", res.text())
 // sets key with ttl of 5 seconds
 await cache.set("key2", "value2", 5)
 
-// permantently deletes cache
+// permanently deletes cache
 await momento.deleteCache("myCache")
 ```
 
