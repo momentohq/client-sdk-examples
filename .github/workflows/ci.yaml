@@ -48,7 +48,10 @@ jobs:
           distribution: 'adopt'
 
       - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+        run: |
+          pushd java
+            chmod +x gradlew
+          popd
 
       - name: Build with Gradle
         run: |
