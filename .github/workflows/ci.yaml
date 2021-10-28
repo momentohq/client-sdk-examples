@@ -3,6 +3,8 @@ name: CI
 on:
   pull_request:
     branches: [main]
+  push:
+    branches: [ main ]
 
 jobs:
   typescript:
@@ -19,7 +21,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 16
-          
+
       - name: Configure Artifactory credentials
         run: |
           # lel this is how jfrog wants you to come up with your scoped npm configuration
@@ -30,4 +32,29 @@ jobs:
           pushd typescript
             npm ci
             npm run build
+          popd
+
+  java:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup repo
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 16
+        uses: actions/setup-java@v2
+        with:
+          java-version: 16
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: |
+          pushd java
+            chmod +x gradlew
+          popd
+
+      - name: Build with Gradle
+        run: |
+          pushd java
+            ./gradlew clean build
           popd
