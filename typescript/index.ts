@@ -19,6 +19,7 @@ const main = async () => {
 
     await cache.set(cacheKey, cacheValue)
     const getResp = await cache.get(cacheKey)
+
     if (getResp.result === MomentoCacheResult.Hit) {
         console.log(`cache hit: ${getResp.text()}`)
     } else {
