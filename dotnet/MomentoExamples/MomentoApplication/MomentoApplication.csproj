@@ -10,6 +10,6 @@
     <Reference Include="Momento, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MomentoSdk" Version="0.3.6" PrivateAssets="all" />
+    <PackageReference Include="MomentoSdk" Version="0.3.7" PrivateAssets="all" />
   </ItemGroup>
 </Project>
