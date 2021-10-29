@@ -22,11 +22,11 @@ namespace MomentoApplication
             CacheGetResponse getResponse = cache.Get(KEY);
 
             Console.WriteLine(getResponse.result);
-            Console.WriteLine(getResponse.Text());
+            Console.WriteLine(getResponse.String());
 
             getResponse = cache.Get("World");
             Console.WriteLine(getResponse.result);
-            Console.WriteLine(getResponse.Text());
+            Console.WriteLine(getResponse.String());
     
         }
     }
