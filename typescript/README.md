@@ -55,8 +55,8 @@ Momento also supports storing pure bytes,
 ```typescript
 const key = new Uint8Array([109,111,109,101,110,116,111])
 const value = new Uint8Array([109,111,109,101,110,116,111,32,105,115,32,97,119,101,115,111,109,101,33,33,33])
-await cache.setBytes(key, value, 50)
-await cache.getBytes(key)
+await cache.set(key, value, 50)
+await cache.get(key)
 ```
 
 Handling cache misses
