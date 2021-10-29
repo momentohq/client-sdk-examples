@@ -48,7 +48,7 @@ console.log("result: ", res.text())
 // sets key with ttl of 5 seconds
 await cache.set("key2", "value2", 5)
 
-// permantently deletes cache
+// permanently deletes cache
 await momento.deleteCache("myCache")
 ```
 
@@ -66,4 +66,20 @@ const res = await cache.get("non-existent key")
 if (res.result === MomentoCacheResult.Miss) {
     console.log("cache miss")
 }
+```
+
+Storing Files
+```typescript
+const buffer = fs.readFileSync("./package.json");
+const filebytes = Uint8Array.from(buffer);
+const cacheKey = "key";
+
+// store file in cache
+await cache.set(cacheKey, filebytes);
+
+// retrieve file from cache
+const getResp = await cache.get(cacheKey);
+
+// write file to disk
+fs.writeFileSync('./package2.json', Buffer.from(getResp.bytes()));
 ```
