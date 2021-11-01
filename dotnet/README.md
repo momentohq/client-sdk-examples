@@ -1,8 +1,7 @@
 # Momento Sdk Examples
 
 ## Prerequisites
-1. [dotnet](https://dotnet.microsoft.com/download)
-1. on macos `brew install --cask dotnet`
+1. [.NET SDK](https://dotnet.microsoft.com/download)
 
 ## How To Run
 1. `cd MomentoExamples`
@@ -24,4 +23,3 @@ To add to your project
 ```
 dotnet add package MomentoSdk -s https://momento.jfrog.io/artifactory/api/nuget/nuget-public
 ```
-
