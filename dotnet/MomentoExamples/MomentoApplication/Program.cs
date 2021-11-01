@@ -19,7 +19,7 @@ namespace MomentoApplication
             cache.Set(KEY, VALUE);
             Console.WriteLine($"Get Value for  Key: {KEY}");
             CacheGetResponse getResponse = cache.Get(KEY);
-            Console.WriteLine($"Lookup Result: {getResponse.result}");
+            Console.WriteLine($"Lookup Result: {getResponse.Result}");
             Console.WriteLine($"Lookedup Value: {getResponse.String()}, Stored Value: {VALUE}");
         }
     }
