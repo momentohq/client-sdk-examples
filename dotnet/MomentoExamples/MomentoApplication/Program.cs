@@ -14,7 +14,7 @@ namespace MomentoApplication
         static void Main(string[] args)
         {
             using Momento momento = new Momento(MOMENTO_AUTH_TOKEN);
-            using MomentoCache cache = momento.CreateOrGetCache(CACHE_NAME, 60);
+            using MomentoCache cache = momento.GetOrCreateCache(CACHE_NAME, 60);
             Console.WriteLine($"Setting Key: {KEY} with Value: {VALUE}");
             cache.Set(KEY, VALUE);
             Console.WriteLine($"Get Value for  Key: {KEY}");

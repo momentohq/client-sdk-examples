@@ -12,3 +12,16 @@
 
 ## Sample Code
 [MomentoApplication](MomentoExamples/MomentoApplication/Program.cs)
+
+## Configuration for your Project
+SDK is built for target framework [.NET Standard 2.1 ](https://github.com/dotnet/standard/blob/master/docs/versions/netstandard2.1.md)
+
+The MomentoSdk is available at https://momento.jfrog.io/ui/repos/tree/General/nuget-public
+
+To add to your project
+
+### CLI
+```
+dotnet add package MomentoSdk -s https://momento.jfrog.io/artifactory/api/nuget/nuget-public
+```
+
