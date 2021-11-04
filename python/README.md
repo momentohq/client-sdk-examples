@@ -1,19 +1,13 @@
 ## Running the Example
 
 - [Python 3.6 or above is required](https://www.python.org/downloads/)
-- [Setting up virtual environments is recommended](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/)
-
 
 ```bash
-python3 -m venv momento-examples-env
 
-source momento-examples-env/bin/activate
-
-pip install -r requirements.txt --extra-index-url https://momento.jfrog.io/artifactory/api/pypi/pypi-public/simple
+python3 -m pip install -r requirements.txt --extra-index-url https://momento.jfrog.io/artifactory/api/pypi/pypi-public/simple
 
 MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> python example.py
 
-deactivate
 ```
 
 ## Using SDK in your project
