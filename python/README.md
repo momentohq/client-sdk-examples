@@ -6,7 +6,7 @@
 
 python3 -m pip install -r requirements.txt --extra-index-url https://momento.jfrog.io/artifactory/api/pypi/pypi-public/simple
 
-MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> python example.py
+MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> python3 example.py
 
 ```
 
