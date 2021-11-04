@@ -7,4 +7,4 @@ Example code for consuming momento SDK
 
 ## [.NET Examples](dotnet/)
 
-## [.Python Examples](python/)
+## [Python Examples](python/)
