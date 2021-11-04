@@ -13,5 +13,5 @@ if __name__ == "__main__":
             cache_client.set(_KEY, _VALUE)
             print('Getting Key: ' + _KEY)
             get_resp = cache_client.get('MyKey')
-            print('Look up resulted in a Cache: ' + str(get_resp.result()))
+            print('Look up resulted in a : ' + str(get_resp.result()))
             print('Looked up Value: ' + get_resp.str_utf8())
