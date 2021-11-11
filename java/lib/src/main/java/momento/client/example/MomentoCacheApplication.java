@@ -9,7 +9,7 @@ public class MomentoCacheApplication {
   private static final String CACHE_NAME = "cache";
   private static final String KEY = "key";
   private static final String VALUE = "value";
-  private static final int ITEM_TTL_SECONDS = 10;
+  private static final int ITEM_TTL_SECONDS = 60;
 
   public static void main(String[] args) {
     System.out.println("Running Momento Cache Demo Application");
