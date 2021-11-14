@@ -3,7 +3,7 @@ import {Momento, MomentoCacheResult} from '@momento/sdk';
 const cacheName = "cache"
 const cacheKey = "key"
 const cacheValue = "value"
-const ttl = 100
+const ttl = 60
 const authToken = process.env.MOMENTO_AUTH_TOKEN
 if (!authToken) {
     throw new Error("Missing required environment variable MOMENTO_AUTH_TOKEN")
