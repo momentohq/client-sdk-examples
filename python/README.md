@@ -1,17 +1,15 @@
 ## Running the Example
 
 - [Python 3.6 or above is required](https://www.python.org/downloads/)
+- A Momento Auth Token is required, you can generate one using the [Momento CLI](https://github.com/momentohq/momento-cli)
 
 ```bash
-
 python3 -m pip install -r requirements.txt --extra-index-url https://momento.jfrog.io/artifactory/api/pypi/pypi-public/simple
-
 MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> python3 example.py
-
 ```
 
 ## Using SDK in your project
-Add the following to requirements.txt or any other dependency management framework used by your project
+Add the following to `requirements.txt` or any other dependency management framework used by your project
 `momento==0.1.1`
 
 The SDK is available at `https://momento.jfrog.io/artifactory/api/pypi/pypi-public/simple`, this can be configured using `--extra-index-url` option

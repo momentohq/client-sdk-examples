@@ -1,25 +1,23 @@
-# Momento Sdk Examples
-
 ## Prerequisites
-1. [.NET SDK](https://dotnet.microsoft.com/download)
+- [.NET SDK](https://dotnet.microsoft.com/download)
+- A Momento Auth Token is required, you can generate one using the [Momento CLI](https://github.com/momentohq/momento-cli)
 
-## How To Run
-1. `cd MomentoExamples`
-1. `dotnet nuget add source https://momento.jfrog.io/artifactory/api/nuget/nuget-public --name Artifactory`
-1. `dotnet build`
-1. `MOMENTO_AUTH_TOKEN=<auth token> dotnet run --project MomentoApplication`
+## Running the Example
+```bash
+cd MomentoExamples
+dotnet nuget add source https://momento.jfrog.io/artifactory/api/nuget/nuget-public --name Artifactory
+dotnet build
+MOMENTO_AUTH_TOKEN=<YOUR AUTH TOKEN> dotnet run --project MomentoApplication
+```
 
-## Sample Code
-[MomentoApplication](MomentoExamples/MomentoApplication/Program.cs)
+Example Code: [MomentoApplication](MomentoExamples/MomentoApplication/Program.cs)
 
-## Configuration for your Project
+## Using the .NET SDK in your project
 SDK is built for target framework [.NET Standard 2.1 ](https://github.com/dotnet/standard/blob/master/docs/versions/netstandard2.1.md)
 
-The MomentoSdk is available at https://momento.jfrog.io/ui/repos/tree/General/nuget-public
+The Momento SDK is available at https://momento.jfrog.io/ui/repos/tree/General/nuget-public
 
-To add to your project
-
-### CLI
+### CLI command to add to your project
 ```
 dotnet add package MomentoSdk -s https://momento.jfrog.io/artifactory/api/nuget/nuget-public
 ```
