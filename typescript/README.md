@@ -19,7 +19,7 @@ Example Code: [index.ts](index.ts)
 
 ### Installation
 ```bash
-npm config set @momento:registry https://momento.jfrog.io/artifactory/npm-public/
+npm config set @momento:registry https://momento.jfrog.io/artifactory/api/npm/npm-public/
 npm install @momento/sdk
 ```
 
