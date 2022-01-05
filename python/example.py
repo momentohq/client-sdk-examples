@@ -4,7 +4,7 @@ import logging
 
 
 _MOMENTO_AUTH_TOKEN = os.getenv('MOMENTO_AUTH_TOKEN')
-_CACHE_NAME = 'dhashdjas'
+_CACHE_NAME = 'cache'
 _KEY = 'MyKey'
 _VALUE = 'MyValue'
 _DEBUG_MODE = os.getenv('DEBUG')
