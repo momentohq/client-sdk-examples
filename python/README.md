@@ -8,12 +8,16 @@ python3 -m pip install -r requirements.txt --extra-index-url https://momento.jfr
 MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> python3 example.py
 ```
 
+To get extra SDK logs, you may choose to run as follows:
+```bash
+DEBUG=true MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> python3 example.py
+```
+
 ## Using SDK in your project
 Add the following to `requirements.txt` or any other dependency management framework used by your project
-`momento==0.2.0`
+`momento==0.4.0`
 
 The SDK is available at `https://momento.jfrog.io/artifactory/api/pypi/pypi-public/simple`, this can be configured using `--extra-index-url` option
 
 e.g.
-`pip install momento==0.2.0 --extra-index-url https://momento.jfrog.io/artifactory/api/pypi/pypi-public/simple`
-
+`pip install momento==0.4.0 --extra-index-url https://momento.jfrog.io/artifactory/api/pypi/pypi-public/simple`
