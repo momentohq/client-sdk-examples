@@ -18,5 +18,5 @@ Add `momento==0.4.0` to `requirements.txt` or any other dependency management fr
 
 To install directly to your system:
 ```bash
-pip install momento==0.4.0 --extra-index-url https://momento.jfrog.io/artifactory/api/pypi/pypi-public/simple`
+pip install momento==0.4.0 --extra-index-url https://momento.jfrog.io/artifactory/api/pypi/pypi-public/simple
 ```
