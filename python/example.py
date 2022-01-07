@@ -42,5 +42,5 @@ if __name__ == "__main__":
             print('Getting Key: ' + _KEY)
             get_resp = cache_client.get('MyKey')
             print('Look up resulted in a : ' + str(get_resp.result()))
-            print('Looked up Value: ' + get_resp.str_utf8())
+            print('Looked up Value: ' + str(get_resp.str_utf8()))
     _print_end_banner()
