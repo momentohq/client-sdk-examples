@@ -1,7 +1,8 @@
 package momento.client.example;
 
-import momento.sdk.Cache;
-import momento.sdk.Momento;
+import momento.sdk.SimpleCacheClient;
+import momento.sdk.exceptions.CacheAlreadyExistsException;
+import momento.sdk.messages.CacheGetResponse;
 
 public class MomentoCacheApplication {
 
@@ -9,23 +10,45 @@ public class MomentoCacheApplication {
   private static final String CACHE_NAME = "cache";
   private static final String KEY = "key";
   private static final String VALUE = "value";
-  private static final int ITEM_TTL_SECONDS = 60;
+  private static final int DEFAULT_ITEM_TTL_SECONDS = 60;
 
   public static void main(String[] args) {
-    System.out.println("Running Momento Cache Demo Application");
-    try (Momento momento = Momento.builder(MOMENTO_AUTH_TOKEN).build()) {
-      try (Cache cache =
-          momento.cacheBuilder(CACHE_NAME, ITEM_TTL_SECONDS).createCacheIfDoesntExist().build()) {
-        System.out.println(
-            String.format("Storing key=%s value=%s w/ ttl=%ds", KEY, VALUE, ITEM_TTL_SECONDS));
-        cache.set(KEY, VALUE);
-        System.out.println(String.format("Looking up item for key=%s ", KEY));
-        String resp = cache.get(KEY).string().get();
-        assert resp.equals(VALUE);
-        System.out.println(
-            String.format("storedValue=%s is equal to lookedUpValue=%s ", VALUE, resp));
-      }
+    printStartBanner();
+    try (SimpleCacheClient simpleCacheClient =
+        SimpleCacheClient.builder(MOMENTO_AUTH_TOKEN, DEFAULT_ITEM_TTL_SECONDS).build()) {
+
+      createCache(simpleCacheClient, CACHE_NAME);
+
+      System.out.println(String.format("Setting key=`%s` , value=`%s`", KEY, VALUE));
+      simpleCacheClient.set(CACHE_NAME, KEY, VALUE);
+
+      System.out.println(String.format("Getting value for key=`%s`", KEY));
+
+      CacheGetResponse getResponse = simpleCacheClient.get(CACHE_NAME, KEY);
+      System.out.println(String.format("Lookup resulted in: `%s`", getResponse.result()));
+      System.out.println(
+          String.format("Looked up value=`%s`", getResponse.string().orElse("NOT FOUND")));
     }
-    System.out.println("Momento Cache Demo Application Done.");
+    printEndBanner();
+  }
+
+  private static void createCache(SimpleCacheClient simpleCacheClient, String cacheName) {
+    try {
+      simpleCacheClient.createCache(cacheName);
+    } catch (CacheAlreadyExistsException e) {
+      System.out.println(String.format("Cache with name `%s` already exists.", cacheName));
+    }
+  }
+
+  private static void printStartBanner() {
+    System.out.println("******************************************************************");
+    System.out.println("*                      Momento Example Start                     *");
+    System.out.println("******************************************************************");
+  }
+
+  private static void printEndBanner() {
+    System.out.println("******************************************************************");
+    System.out.println("*                       Momento Example End                      *");
+    System.out.println("******************************************************************");
   }
 }

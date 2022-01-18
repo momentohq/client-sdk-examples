@@ -6,7 +6,6 @@
 
 
 ```bash
-cd java/
 MOMENTO_AUTH_TOKEN=<YOUR AUTH TOKEN> ./gradlew run
 ```
 
@@ -26,6 +25,6 @@ repositories {
 }
 
 dependencies {
-    implementation("momento.sandbox:momento-sdk:0.14.0")
+    implementation("momento.sandbox:momento-sdk:0.16.0")
 }
 ```
