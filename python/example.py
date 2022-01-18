@@ -1,14 +1,14 @@
 import os
-import momento.momento as momento
+import momento.simple_cache_client as simple_cache_client
+import momento.errors as errors
 import logging
-
 
 _MOMENTO_AUTH_TOKEN = os.getenv('MOMENTO_AUTH_TOKEN')
 _CACHE_NAME = 'cache'
+_ITEM_DEFAULT_TTL_SECONDS = 60
 _KEY = 'MyKey'
 _VALUE = 'MyValue'
 _DEBUG_MODE = os.getenv('DEBUG')
-
 
 if (_DEBUG_MODE == 'true'):
     logger = logging.getLogger('momentosdk')
@@ -18,7 +18,8 @@ if (_DEBUG_MODE == 'true'):
     consoleHandler.setLevel(logging.DEBUG)
     logger.addHandler(consoleHandler)
 
-    formatter = logging.Formatter('%(asctime)s  %(name)s  %(levelname)s: %(message)s')
+    formatter = logging.Formatter(
+        '%(asctime)s  %(name)s  %(levelname)s: %(message)s')
     consoleHandler.setFormatter(formatter)
 
 
@@ -27,20 +28,29 @@ def _print_start_banner():
     print('*                      Momento Example Start                     *')
     print('******************************************************************')
 
+
 def _print_end_banner():
     print('******************************************************************')
     print('*                       Momento Example End                      *')
     print('******************************************************************')
 
 
+def _create_cache(simple_cache_client, cache_name):
+    try:
+        simple_cache_client.create_cache(cache_name)
+    except errors.CacheExistsError:
+        print('Cache with name: `' + cache_name + '` already exists.')
+
+
 if __name__ == "__main__":
     _print_start_banner()
-    with momento.init(_MOMENTO_AUTH_TOKEN) as momento_client:
-        with momento_client.get_cache(_CACHE_NAME, ttl_seconds=60, create_if_absent=True) as cache_client:
-            print('Setting Key: ' + _KEY + ' Value: ' + _VALUE)
-            cache_client.set(_KEY, _VALUE)
-            print('Getting Key: ' + _KEY)
-            get_resp = cache_client.get(_KEY)
-            print('Look up resulted in a : ' + str(get_resp.result()))
-            print('Looked up Value: ' + str(get_resp.str_utf8()))
+    with simple_cache_client.init(_MOMENTO_AUTH_TOKEN,
+                                  _ITEM_DEFAULT_TTL_SECONDS) as cache_client:
+        _create_cache(cache_client, _CACHE_NAME)
+        print('Setting Key: ' + _KEY + ' Value: ' + _VALUE)
+        cache_client.set(_CACHE_NAME, _KEY, _VALUE)
+        print('Getting Key: ' + _KEY)
+        get_resp = cache_client.get(_CACHE_NAME, _KEY)
+        print('Look up resulted in a : ' + str(get_resp.result()))
+        print('Looked up Value: ' + str(get_resp.str_utf8()))
     _print_end_banner()
