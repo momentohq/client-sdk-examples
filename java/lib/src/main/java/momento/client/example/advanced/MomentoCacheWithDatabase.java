@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import momento.sdk.Cache;
-import momento.sdk.Momento;
+import momento.sdk.SimpleCacheClient;
+import momento.sdk.exceptions.CacheAlreadyExistsException;
 import momento.sdk.messages.CacheGetResponse;
 
 /**
@@ -26,16 +26,17 @@ public class MomentoCacheWithDatabase {
   private static final int DEFAULT_ITEM_TTL = 60;
 
   public static void main(String[] args) {
+    printStartBanner();
     Database database = new DatabaseImpl();
-    try (Momento momento = Momento.builder(MOMENTO_AUTH_TOKEN).build()) {
-      try (Cache cache =
-          momento.cacheBuilder(CACHE_NAME, DEFAULT_ITEM_TTL).createCacheIfDoesntExist().build()) {
-        runExample(cache, database);
-      }
+    try (SimpleCacheClient simpleCacheClient =
+        SimpleCacheClient.builder(MOMENTO_AUTH_TOKEN, DEFAULT_ITEM_TTL).build()) {
+      createCache(simpleCacheClient, CACHE_NAME);
+      runExample(simpleCacheClient, database);
     }
+    printEndBanner();
   }
 
-  private static void runExample(Cache cache, Database database) {
+  private static void runExample(SimpleCacheClient cache, Database database) {
     for (String itemId : itemIds) {
       System.out.println(String.format("Initiating Lookup for item id: %s", itemId));
       String result = lookup(itemId, cache, database).orElse(ITEM_NOT_FOUND_MESSAGE);
@@ -56,18 +57,20 @@ public class MomentoCacheWithDatabase {
   }
 
   // Handle cache lookups and fallback to database when item isn't found
-  private static Optional<String> lookup(String itemId, Cache cache, Database database) {
-    CacheGetResponse response = cache.get(itemId);
+  private static Optional<String> lookup(
+      String itemId, SimpleCacheClient cache, Database database) {
+    CacheGetResponse response = cache.get(CACHE_NAME, itemId);
     writeCacheLog(response, itemId);
     return response.string().or(() -> handleCacheMiss(itemId, cache, database));
   }
 
   // Handle Cache Miss
   // Lookup the item in database and if found, add the item to cache.
-  private static Optional<String> handleCacheMiss(String itemId, Cache cache, Database database) {
+  private static Optional<String> handleCacheMiss(
+      String itemId, SimpleCacheClient cache, Database database) {
     Optional<String> item = database.getItem(itemId);
     if (item.isPresent()) {
-      cache.set(itemId, item.get());
+      cache.set(CACHE_NAME, itemId, item.get());
       System.out.println(
           String.format(
               "Item stored with key: %s and value: %s stored in Cache", itemId, item.get()));
@@ -78,6 +81,26 @@ public class MomentoCacheWithDatabase {
   private static void writeCacheLog(CacheGetResponse response, String key) {
     System.out.println(
         String.format("Cache lookup up for item id: %s resulted in : %s", key, response.result()));
+  }
+
+  private static void createCache(SimpleCacheClient simpleCacheClient, String cacheName) {
+    try {
+      simpleCacheClient.createCache(cacheName);
+    } catch (CacheAlreadyExistsException e) {
+      System.out.println(String.format("Cache with name `%s` already exists.", cacheName));
+    }
+  }
+
+  private static void printStartBanner() {
+    System.out.println("******************************************************************");
+    System.out.println("*                      Momento Example Start                     *");
+    System.out.println("******************************************************************");
+  }
+
+  private static void printEndBanner() {
+    System.out.println("******************************************************************");
+    System.out.println("*                       Momento Example End                      *");
+    System.out.println("******************************************************************");
   }
 }
 
