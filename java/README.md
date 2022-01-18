@@ -6,7 +6,6 @@
 
 
 ```bash
-cd java/
 MOMENTO_AUTH_TOKEN=<YOUR AUTH TOKEN> ./gradlew run
 ```
 
