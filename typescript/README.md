@@ -6,7 +6,6 @@
 ```bash
 # Set your npm registry
 npm config set @momento:registry https://momento.jfrog.io/artifactory/api/npm/npm-public/
-cd typescript
 npm install
 
 # Run example code
