@@ -5,7 +5,7 @@
 ## Running the Example
 ```bash
 cd MomentoExamples
-dotnet nuget add source https://momento.jfrog.io/artifactory/api/nuget/nuget-public --name Artifactory
+dotnet nuget add source https://momento.jfrog.io/artifactory/api/nuget/nuget-public --name Momento-Artifactory
 dotnet build
 MOMENTO_AUTH_TOKEN=<YOUR AUTH TOKEN> dotnet run --project MomentoApplication
 ```
@@ -19,5 +19,6 @@ The Momento SDK is available at https://momento.jfrog.io/ui/repos/tree/General/n
 
 ### CLI command to add to your project
 ```
-dotnet add package MomentoSdk -s https://momento.jfrog.io/artifactory/api/nuget/nuget-public
+dotnet nuget add source https://momento.jfrog.io/artifactory/api/nuget/nuget-public --name Momento-Artifactory
+dotnet add package MomentoSdk
 ```
