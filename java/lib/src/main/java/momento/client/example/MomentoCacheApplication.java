@@ -1,7 +1,7 @@
 package momento.client.example;
 
 import momento.sdk.SimpleCacheClient;
-import momento.sdk.exceptions.CacheAlreadyExistsException;
+import momento.sdk.exceptions.AlreadyExistsException;
 import momento.sdk.messages.CacheGetResponse;
 
 public class MomentoCacheApplication {
@@ -25,7 +25,7 @@ public class MomentoCacheApplication {
       System.out.println(String.format("Getting value for key=`%s`", KEY));
 
       CacheGetResponse getResponse = simpleCacheClient.get(CACHE_NAME, KEY);
-      System.out.println(String.format("Lookup resulted in: `%s`", getResponse.result()));
+      System.out.println(String.format("Lookup resulted in: `%s`", getResponse.status()));
       System.out.println(
           String.format("Looked up value=`%s`", getResponse.string().orElse("NOT FOUND")));
     }
@@ -35,7 +35,7 @@ public class MomentoCacheApplication {
   private static void createCache(SimpleCacheClient simpleCacheClient, String cacheName) {
     try {
       simpleCacheClient.createCache(cacheName);
-    } catch (CacheAlreadyExistsException e) {
+    } catch (AlreadyExistsException e) {
       System.out.println(String.format("Cache with name `%s` already exists.", cacheName));
     }
   }
