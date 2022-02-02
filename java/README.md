@@ -25,6 +25,6 @@ repositories {
 }
 
 dependencies {
-    implementation("momento.sandbox:momento-sdk:0.17.0")
+    implementation("momento.sandbox:momento-sdk:0.18.0")
 }
 ```

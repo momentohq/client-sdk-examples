@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import momento.sdk.SimpleCacheClient;
-import momento.sdk.exceptions.CacheAlreadyExistsException;
+import momento.sdk.exceptions.AlreadyExistsException;
 import momento.sdk.messages.CacheGetResponse;
 
 /**
@@ -80,13 +80,13 @@ public class MomentoCacheWithDatabase {
 
   private static void writeCacheLog(CacheGetResponse response, String key) {
     System.out.println(
-        String.format("Cache lookup up for item id: %s resulted in : %s", key, response.result()));
+        String.format("Cache lookup up for item id: %s resulted in : %s", key, response.status()));
   }
 
   private static void createCache(SimpleCacheClient simpleCacheClient, String cacheName) {
     try {
       simpleCacheClient.createCache(cacheName);
-    } catch (CacheAlreadyExistsException e) {
+    } catch (AlreadyExistsException e) {
       System.out.println(String.format("Cache with name `%s` already exists.", cacheName));
     }
   }
