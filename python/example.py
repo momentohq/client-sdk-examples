@@ -38,8 +38,8 @@ def _print_end_banner():
 def _create_cache(simple_cache_client, cache_name):
     try:
         simple_cache_client.create_cache(cache_name)
-    except errors.CacheExistsError:
-        print('Cache with name: `' + cache_name + '` already exists.')
+    except errors.AlreadyExistsError:
+        print(f'Cache with name: `{cache_name}` already exists.')
 
 
 if __name__ == "__main__":
@@ -47,10 +47,10 @@ if __name__ == "__main__":
     with simple_cache_client.init(_MOMENTO_AUTH_TOKEN,
                                   _ITEM_DEFAULT_TTL_SECONDS) as cache_client:
         _create_cache(cache_client, _CACHE_NAME)
-        print('Setting Key: ' + _KEY + ' Value: ' + _VALUE)
+        print(f'Setting Key: {_KEY} Value: {_VALUE}')
         cache_client.set(_CACHE_NAME, _KEY, _VALUE)
-        print('Getting Key: ' + _KEY)
+        print(f'Getting Key: {_KEY}')
         get_resp = cache_client.get(_CACHE_NAME, _KEY)
-        print('Look up resulted in a : ' + str(get_resp.result()))
-        print('Looked up Value: ' + str(get_resp.str_utf8()))
+        print(f'Look up resulted in a : {str(get_resp.status())}')
+        print(f'Looked up Value: {str(get_resp.value())}')
     _print_end_banner()
