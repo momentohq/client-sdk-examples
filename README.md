@@ -3,7 +3,7 @@ Example code for consuming momento SDK
 
 ## [Java Examples](java/)
 
-## [Javascript Examples](typescript/)
+## [Javascript Examples](javascript/)
 
 ## [.NET Examples](dotnet/)
 

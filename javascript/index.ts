@@ -1,4 +1,4 @@
-import {SimpleCacheClient, CacheGetStatus} from '@momento/sdk';
+import {SimpleCacheClient, CacheGetStatus, AlreadyExistsError} from '@momento/sdk';
 
 const cacheName = "cache"
 const cacheKey = "key"
@@ -16,7 +16,11 @@ const main = async () => {
     try {
         await momento.createCache(cacheName);
     } catch(e) {
-        console.log("cache already exists")
+        if (e instanceof AlreadyExistsError) {
+            console.log("cache already exists")
+        } else {
+            throw e
+        }
     }
 
     console.log(`Storing key=${cacheKey}, value=${cacheValue}, ttl=${ttl}`)
