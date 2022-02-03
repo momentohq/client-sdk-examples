@@ -1,4 +1,4 @@
-import {Momento, MomentoCacheResult} from '@momento/sdk';
+import {SimpleCacheClient, CacheGetStatus} from '@momento/sdk';
 
 const cacheName = "cache"
 const cacheKey = "key"
@@ -9,18 +9,21 @@ if (!authToken) {
     throw new Error("Missing required environment variable MOMENTO_AUTH_TOKEN")
 }
 
-const momento = new Momento(authToken);
+const defaultTtl = 60;
+const momento = new SimpleCacheClient(authToken, defaultTtl);
 
 const main = async () => {
-    const cache = await momento.createOrGetCache(cacheName, {
-        defaultTtlSeconds: ttl
-    });
+    try {
+        await momento.createCache(cacheName);
+    } catch(e) {
+        console.log("cache already exists")
+    }
+
     console.log(`Storing key=${cacheKey}, value=${cacheValue}, ttl=${ttl}`)
+    await momento.set(cacheName, cacheKey, cacheValue)
+    const getResp = await momento.get(cacheName, cacheKey)
 
-    await cache.set(cacheKey, cacheValue)
-    const getResp = await cache.get(cacheKey)
-
-    if (getResp.result === MomentoCacheResult.Hit) {
+    if (getResp.status === CacheGetStatus.Hit) {
         console.log(`cache hit: ${getResp.text()}`)
     } else {
         console.log('cache miss')
