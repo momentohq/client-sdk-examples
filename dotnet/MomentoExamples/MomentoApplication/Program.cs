@@ -10,16 +10,16 @@ namespace MomentoApplication
         static readonly String CACHE_NAME = "cache";
         static readonly String KEY = "MyKey";
         static readonly String VALUE = "MyData";
-        
+        static readonly uint DEFAULT_TTL_SECONDS = 60;
+
         static void Main(string[] args)
         {
-            using Momento momento = new Momento(MOMENTO_AUTH_TOKEN);
-            using MomentoCache cache = momento.GetOrCreateCache(CACHE_NAME, 60);
+            using SimpleCacheClient client = new SimpleCacheClient(MOMENTO_AUTH_TOKEN, DEFAULT_TTL_SECONDS);
+            client.CreateCache(CACHE_NAME);
             Console.WriteLine($"Setting Key: {KEY} with Value: {VALUE}");
-            cache.Set(KEY, VALUE);
+            client.Set(CACHE_NAME, KEY, VALUE);
             Console.WriteLine($"Get Value for  Key: {KEY}");
-            CacheGetResponse getResponse = cache.Get(KEY);
-            Console.WriteLine($"Lookup Result: {getResponse.Result}");
+            CacheGetResponse getResponse = client.Get(CACHE_NAME, KEY);
             Console.WriteLine($"Lookedup Value: {getResponse.String()}, Stored Value: {VALUE}");
         }
     }
