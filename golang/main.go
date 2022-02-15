@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
 
 	"github.com/google/uuid"
@@ -21,44 +21,44 @@ func main() {
 		DefaultTtlSeconds: ItemDefaultTtlSeconds,
 	})
 	if err != nil {
-		fmt.Println(err.Error())
+		panic(err)
 	} else {
 		// Create Cache and check if CacheName exists
 		err := client.CreateCache(&momento.CreateCacheRequest{
 			CacheName: CacheName,
 		})
 		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
+			panic(err)
 		}
 	}
 
 	// Sets key with default TTL and gets value with that key
 	key := []byte(uuid.NewString())
 	value := []byte(uuid.NewString())
-	fmt.Printf("Setting key: %s, value: %s\n", key, value)
+	log.Printf("Setting key: %s, value: %s\n", key, value)
 	_, err = client.Set(&momento.CacheSetRequest{
 		CacheName: CacheName,
 		Key:       key,
 		Value:     value,
 	})
 	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		panic(err)
 	}
-	fmt.Printf("Getting key: %s", key)
+	log.Printf("Getting key: %s\n", key)
 	resp, err := client.Get(&momento.CacheGetRequest{
 		CacheName: CacheName,
 		Key:       key,
 	})
 	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		panic(err)
 	} else {
-		fmt.Printf("Lookup resulted in a : %s\n", resp.Result())
-		fmt.Printf("Looked up value: %s\n", resp.StringValue())
+		log.Printf("Lookup resulted in a : %s\n", resp.Result())
+		log.Printf("Looked up value: %s\n", resp.StringValue())
 	}
 
 	// Permanently delete the cache
-	client.DeleteCache(&momento.DeleteCacheRequest{CacheName: CacheName})
+	err = client.DeleteCache(&momento.DeleteCacheRequest{CacheName: CacheName})
+	if err != nil {
+		panic(err)
+	}
 }

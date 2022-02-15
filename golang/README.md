@@ -4,7 +4,7 @@
 - A Momento Auth Token is required, you can generate one using the [Momento CLI](https://github.com/momentohq/momento-cli)
 
 ```bash
-go mod download
+go mod vendor
 MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> go run main.go
 ```
 
