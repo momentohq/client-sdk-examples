@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/momentohq/client-sdk-go/momento"
@@ -14,6 +15,10 @@ func main() {
 		CacheName             = "momentocache"
 		ItemDefaultTtlSeconds = 60
 	)
+
+	if AuthToken == "" {
+		log.Fatal("Missing required environment variable MOMENTO_AUTH_TOKEN")
+	}
 
 	// Initializes Momento
 	client, err := momento.SimpleCacheClient(&momento.SimpleCacheClientRequest{
@@ -27,7 +32,7 @@ func main() {
 		err := client.CreateCache(&momento.CreateCacheRequest{
 			CacheName: CacheName,
 		})
-		if err != nil {
+		if err != nil && !strings.Contains(err.Error(), "AlreadyExists") {
 			panic(err)
 		}
 	}
