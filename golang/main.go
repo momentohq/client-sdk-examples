@@ -11,7 +11,7 @@ import (
 func main() {
 	var AuthToken = os.Getenv("MOMENTO_AUTH_TOKEN")
 	const (
-		CacheName             = "cache"
+		CacheName             = "momentocache"
 		ItemDefaultTtlSeconds = 60
 	)
 
@@ -36,7 +36,7 @@ func main() {
 	// Sets key with default TTL and gets value with that key
 	key := []byte(uuid.NewString())
 	value := []byte(uuid.NewString())
-	fmt.Printf("Setting key: %s, value: %s", key, value)
+	fmt.Printf("Setting key: %s, value: %s\n", key, value)
 	_, err = client.Set(&momento.CacheSetRequest{
 		CacheName: CacheName,
 		Key:       key,
@@ -55,8 +55,8 @@ func main() {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	} else {
-		fmt.Printf("Lookup resulted in a : %s", resp.Result())
-		fmt.Printf("Looked up value: %s", resp.StringValue())
+		fmt.Printf("Lookup resulted in a : %s\n", resp.Result())
+		fmt.Printf("Looked up value: %s\n", resp.StringValue())
 	}
 
 	// Permanently delete the cache
