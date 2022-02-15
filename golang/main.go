@@ -12,7 +12,7 @@ import (
 func main() {
 	var AuthToken = os.Getenv("MOMENTO_AUTH_TOKEN")
 	const (
-		CacheName             = "momentocache"
+		CacheName             = "cache"
 		ItemDefaultTtlSeconds = 60
 	)
 
