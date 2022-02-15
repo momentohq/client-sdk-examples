@@ -27,15 +27,15 @@ func main() {
 	})
 	if err != nil {
 		panic(err)
-	} else {
-		// Create Cache and check if CacheName exists
-		err := client.CreateCache(&momento.CreateCacheRequest{
-			CacheName: CacheName,
-		})
-		if err != nil && !strings.Contains(err.Error(), "AlreadyExists") {
-			panic(err)
-		}
 	}
+	// Create Cache and check if CacheName exists
+	err = client.CreateCache(&momento.CreateCacheRequest{
+		CacheName: CacheName,
+	})
+	if err != nil && !strings.Contains(err.Error(), "AlreadyExists") {
+		panic(err)
+	}
+	log.Printf("Cache named %s is created\n", CacheName)
 
 	// Sets key with default TTL and gets value with that key
 	key := []byte(uuid.NewString())
@@ -56,14 +56,14 @@ func main() {
 	})
 	if err != nil {
 		panic(err)
-	} else {
-		log.Printf("Lookup resulted in a : %s\n", resp.Result())
-		log.Printf("Looked up value: %s\n", resp.StringValue())
 	}
+	log.Printf("Lookup resulted in a : %s\n", resp.Result())
+	log.Printf("Looked up value: %s\n", resp.StringValue())
 
 	// Permanently delete the cache
 	err = client.DeleteCache(&momento.DeleteCacheRequest{CacheName: CacheName})
 	if err != nil {
 		panic(err)
 	}
+	log.Printf("Cache named %s is deleted\n", CacheName)
 }

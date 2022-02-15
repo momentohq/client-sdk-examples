@@ -1,6 +1,6 @@
 ## Running the Example
 
-- [Go version 0.17.\*](https://go.dev/dl/) is required
+- [Go version 1.17.\*](https://go.dev/dl/) is required
 - A Momento Auth Token is required, you can generate one using the [Momento CLI](https://github.com/momentohq/momento-cli)
 
 ```bash
