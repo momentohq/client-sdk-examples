@@ -10,39 +10,37 @@ import (
 )
 
 func main() {
-	var AuthToken = os.Getenv("MOMENTO_AUTH_TOKEN")
+	var authToken = os.Getenv("MOMENTO_AUTH_TOKEN")
 	const (
-		CacheName             = "cache"
-		ItemDefaultTtlSeconds = 60
+		cacheName             = "cache"
+		itemDefaultTtlSeconds = 60
 	)
 
-	if AuthToken == "" {
+	if authToken == "" {
 		log.Fatal("Missing required environment variable MOMENTO_AUTH_TOKEN")
 	}
 
 	// Initializes Momento
-	client, err := momento.SimpleCacheClient(&momento.SimpleCacheClientRequest{
-		AuthToken:         AuthToken,
-		DefaultTtlSeconds: ItemDefaultTtlSeconds,
-	})
+	client, err := momento.NewSimpleCacheClient(authToken, itemDefaultTtlSeconds)
 	if err != nil {
 		panic(err)
 	}
+
 	// Create Cache and check if CacheName exists
 	err = client.CreateCache(&momento.CreateCacheRequest{
-		CacheName: CacheName,
+		CacheName: cacheName,
 	})
-	if err != nil && !strings.Contains(err.Error(), "AlreadyExists") {
+	if err != nil && !strings.Contains(err.Error(), momento.AlreadyExists) {
 		panic(err)
 	}
-	log.Printf("Cache named %s is created\n", CacheName)
+	log.Printf("Cache named %s is created\n", cacheName)
 
 	// Sets key with default TTL and gets value with that key
 	key := []byte(uuid.NewString())
 	value := []byte(uuid.NewString())
 	log.Printf("Setting key: %s, value: %s\n", key, value)
 	_, err = client.Set(&momento.CacheSetRequest{
-		CacheName: CacheName,
+		CacheName: cacheName,
 		Key:       key,
 		Value:     value,
 	})
@@ -51,7 +49,7 @@ func main() {
 	}
 	log.Printf("Getting key: %s\n", key)
 	resp, err := client.Get(&momento.CacheGetRequest{
-		CacheName: CacheName,
+		CacheName: cacheName,
 		Key:       key,
 	})
 	if err != nil {
@@ -61,9 +59,9 @@ func main() {
 	log.Printf("Looked up value: %s\n", resp.StringValue())
 
 	// Permanently delete the cache
-	err = client.DeleteCache(&momento.DeleteCacheRequest{CacheName: CacheName})
+	err = client.DeleteCache(&momento.DeleteCacheRequest{CacheName: cacheName})
 	if err != nil {
 		panic(err)
 	}
-	log.Printf("Cache named %s is deleted\n", CacheName)
+	log.Printf("Cache named %s is deleted\n", cacheName)
 }
