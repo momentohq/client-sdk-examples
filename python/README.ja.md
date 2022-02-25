@@ -22,7 +22,7 @@ DEBUG=true MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> python3 example.py
 
 ## SDK を自身のプロジェクトで使用する
 
-`momento==0.9.1`を`requirements.txt`に追加する、もしくは自身のプロジェクで使用しているディペンデンシー管理フレームワークに追して下さい。
+`momento==0.9.1`を`requirements.txt`に追加する、もしくは自身のプロジェクで使用しているディペンデンシー管理フレームワークに追加して下さい。
 
 自身のシステムに直接インストールする方法:
 
