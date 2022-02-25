@@ -15,7 +15,7 @@ npm config set @momento:registry https://momento.jfrog.io/artifactory/api/npm/np
 cd javascript
 npm install
 
-#  SDKコード例を実行する
+# SDKコード例を実行する
 MOMENTO_AUTH_TOKEN=<YOUR AUTH TOKEN> npm run example
 ```
 
