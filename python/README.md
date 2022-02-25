@@ -1,3 +1,9 @@
+# Python Client SDK
+
+_Read this in other languages_: [日本語](README.ja.md)
+
+<br>
+
 ## Running the Example
 
 - [Python 3.7 or above is required](https://www.python.org/downloads/)

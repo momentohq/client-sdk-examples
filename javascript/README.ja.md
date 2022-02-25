@@ -1,64 +1,64 @@
-# JavaScript Client SDK
+# JavaScript クライアント SDK
 
-_Read this in other languages_: [日本語](README.ja.md)
+_他言語バージョンもあります_：[English](README.md)
 
 <br>
 
-## Running the Example
+## SDK のコード例を実行する
 
-- Node version 10.13 or higher is required
-- A Momento Auth Token is required, you can generate one using the [Momento CLI](https://github.com/momentohq/momento-cli)
+- Node バージョン 10.13 もしくはそれ以上
+- Momento オーストークンが必要です。トークン発行は[Momento CLI](https://github.com/momentohq/momento-cli)から行えます。
 
 ```bash
-# Set your npm registry
+# npm registryを設定する
 npm config set @momento:registry https://momento.jfrog.io/artifactory/api/npm/npm-public/
 cd javascript
 npm install
 
-# Run example code
+# SDKコード例を実行する
 MOMENTO_AUTH_TOKEN=<YOUR AUTH TOKEN> npm run example
 ```
 
-Example Code: [index.ts](index.ts)
+SDK コード例: [index.ts](index.ts)
 
-## Using the SDK in your projects
+## SDK を自身のプロジェクトで使用する
 
-### Installation
+### インストール方法
 
 ```bash
 npm config set @momento:registry https://momento.jfrog.io/artifactory/api/npm/npm-public/
 npm install @momento/sdk
 ```
 
-### Usage
+### 使用方法
 
 ```typescript
 import { SimpleCacheClient, CacheGetStatus } from "@momento/sdk";
 
-// your authentication token for momento
+// ユーザーのMomentoオーストークン
 const authToken = process.env.MOMENTO_AUTH_TOKEN;
 
-// initializing momento
-const DEFAULT_TTL = 60; // 60 seconds for default ttl
+//  Momentoをイニシャライズする
+const DEFAULT_TTL = 60; // デフォルトTTLは60秒
 const momento = new SimpleCacheClient(authToken, DEFAULT_TTL);
 
-// creating a cache named "myCache", and subsequently returning it
+// "myCache"という名のキャッシュを作成し、その後そのキャッシュをリターンする
 const CACHE_NAME = "myCache";
 const cache = await momento.createCache(CACHE_NAME);
 
-// sets key with default ttl
+// デフォルトTTLでキーを設定
 await cache.set(CACHE_NAME, "key", "value");
 const res = await cache.get(CACHE_NAME, "key");
 console.log("result: ", res.text());
 
-// sets key with ttl of 5 seconds
+// TTL５秒でキーを設定
 await cache.set(CACHE_NAME, "key2", "value2", 5);
 
-// permanently deletes cache
+// 永久にキャッシュを削除する
 await momento.deleteCache(CACHE_NAME);
 ```
 
-Momento also supports storing pure bytes,
+Momento はバイト型のストアもサポートしています
 
 ```typescript
 const key = new Uint8Array([109, 111, 109, 101, 110, 116, 111]);
@@ -70,7 +70,7 @@ await cache.set("cache", key, value, 50);
 await cache.get("cache", key);
 ```
 
-Handling cache misses
+キャッシュミスの対応
 
 ```typescript
 const res = await cache.get("cache", "non-existent key");
@@ -79,7 +79,7 @@ if (res.status === CacheGetStatus.Miss) {
 }
 ```
 
-Storing Files
+ファイルのストア
 
 ```typescript
 const buffer = fs.readFileSync("./file.txt");
@@ -87,12 +87,12 @@ const filebytes = Uint8Array.from(buffer);
 const cacheKey = "key";
 const cacheName = "my example cache";
 
-// store file in cache
+// キャッシュにファイルをストアする
 await cache.set(cacheName, cacheKey, filebytes);
 
-// retrieve file from cache
+// ファイルをキャッシュから取り出す
 const getResp = await cache.get(cacheName, cacheKey);
 
-// write file to disk
+// ファイルをディスクに書き込む
 fs.writeFileSync("./file-from-cache.txt", Buffer.from(getResp.bytes()));
 ```
