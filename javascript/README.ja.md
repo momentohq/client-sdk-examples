@@ -42,17 +42,17 @@ const authToken = process.env.MOMENTO_AUTH_TOKEN;
 const DEFAULT_TTL = 60; // デフォルトTTLは60秒
 const momento = new SimpleCacheClient(authToken, DEFAULT_TTL);
 
-// "myCache"という名のキャッシュを作成し、その後そのキャッシュをリターンする
+// "myCache"という名のキャッシュを作成する
 const CACHE_NAME = "myCache";
-const cache = await momento.createCache(CACHE_NAME);
+await momento.createCache(CACHE_NAME);
 
 // デフォルトTTLでキーを設定
-await cache.set(CACHE_NAME, "key", "value");
-const res = await cache.get(CACHE_NAME, "key");
+await momento.set(CACHE_NAME, "key", "value");
+const res = await momento.get(CACHE_NAME, "key");
 console.log("result: ", res.text());
 
 // TTL５秒でキーを設定
-await cache.set(CACHE_NAME, "key2", "value2", 5);
+await momento.set(CACHE_NAME, "key2", "value2", 5);
 
 // 永久にキャッシュを削除する
 await momento.deleteCache(CACHE_NAME);
@@ -66,14 +66,14 @@ const value = new Uint8Array([
   109, 111, 109, 101, 110, 116, 111, 32, 105, 115, 32, 97, 119, 101, 115, 111,
   109, 101, 33, 33, 33,
 ]);
-await cache.set("cache", key, value, 50);
-await cache.get("cache", key);
+await momento.set("cache", key, value, 50);
+await momento.get("cache", key);
 ```
 
 キャッシュミスの対応
 
 ```typescript
-const res = await cache.get("cache", "non-existent key");
+const res = await momento.get("cache", "non-existent key");
 if (res.status === CacheGetStatus.Miss) {
   console.log("cache miss");
 }
@@ -88,10 +88,10 @@ const cacheKey = "key";
 const cacheName = "my example cache";
 
 // キャッシュにファイルをストアする
-await cache.set(cacheName, cacheKey, filebytes);
+await momento.set(cacheName, cacheKey, filebytes);
 
 // ファイルをキャッシュから取り出す
-const getResp = await cache.get(cacheName, cacheKey);
+const getResp = await momento.get(cacheName, cacheKey);
 
 // ファイルをディスクに書き込む
 fs.writeFileSync("./file-from-cache.txt", Buffer.from(getResp.bytes()));

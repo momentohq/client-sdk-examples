@@ -42,17 +42,17 @@ const authToken = process.env.MOMENTO_AUTH_TOKEN;
 const DEFAULT_TTL = 60; // 60 seconds for default ttl
 const momento = new SimpleCacheClient(authToken, DEFAULT_TTL);
 
-// creating a cache named "myCache", and subsequently returning it
+// creating a cache named "myCache"
 const CACHE_NAME = "myCache";
-const cache = await momento.createCache(CACHE_NAME);
+await momento.createCache(CACHE_NAME);
 
 // sets key with default ttl
-await cache.set(CACHE_NAME, "key", "value");
-const res = await cache.get(CACHE_NAME, "key");
+await momento.set(CACHE_NAME, "key", "value");
+const res = await momento.get(CACHE_NAME, "key");
 console.log("result: ", res.text());
 
 // sets key with ttl of 5 seconds
-await cache.set(CACHE_NAME, "key2", "value2", 5);
+await momento.set(CACHE_NAME, "key2", "value2", 5);
 
 // permanently deletes cache
 await momento.deleteCache(CACHE_NAME);
@@ -66,8 +66,8 @@ const value = new Uint8Array([
   109, 111, 109, 101, 110, 116, 111, 32, 105, 115, 32, 97, 119, 101, 115, 111,
   109, 101, 33, 33, 33,
 ]);
-await cache.set("cache", key, value, 50);
-await cache.get("cache", key);
+await momento.set("cache", key, value, 50);
+await momento.get("cache", key);
 ```
 
 Handling cache misses
@@ -88,10 +88,10 @@ const cacheKey = "key";
 const cacheName = "my example cache";
 
 // store file in cache
-await cache.set(cacheName, cacheKey, filebytes);
+await momento.set(cacheName, cacheKey, filebytes);
 
 // retrieve file from cache
-const getResp = await cache.get(cacheName, cacheKey);
+const getResp = await momento.get(cacheName, cacheKey);
 
 // write file to disk
 fs.writeFileSync("./file-from-cache.txt", Buffer.from(getResp.bytes()));
