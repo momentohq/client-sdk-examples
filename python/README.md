@@ -22,10 +22,10 @@ DEBUG=true MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> python3 example.py
 
 ## Using SDK in your project
 
-Add `momento==0.9.1` to `requirements.txt` or any other dependency management framework used by your project.
+Add `momento==0.10.0` to `requirements.txt` or any other dependency management framework used by your project.
 
 To install directly to your system:
 
 ```bash
-pip install momento==0.9.1
+pip install momento==0.10.0
 ```
