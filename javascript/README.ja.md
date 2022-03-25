@@ -6,12 +6,10 @@ _他言語バージョンもあります_：[English](README.md)
 
 ## SDK のコード例を実行する
 
-- Node バージョン 10.13 もしくはそれ以上
+- Node バージョン 16 もしくはそれ以上
 - Momento オーストークンが必要です。トークン発行は[Momento CLI](https://github.com/momentohq/momento-cli)から行えます。
 
 ```bash
-# npm registryを設定する
-npm config set @momento:registry https://momento.jfrog.io/artifactory/api/npm/npm-public/
 cd javascript
 npm install
 
@@ -26,14 +24,13 @@ SDK コード例: [index.ts](index.ts)
 ### インストール方法
 
 ```bash
-npm config set @momento:registry https://momento.jfrog.io/artifactory/api/npm/npm-public/
-npm install @momento/sdk
+npm install @gomomento/sdk
 ```
 
 ### 使用方法
 
 ```typescript
-import { SimpleCacheClient, CacheGetStatus } from "@momento/sdk";
+import { SimpleCacheClient, CacheGetStatus } from "@gomomento/sdk";
 
 // ユーザーのMomentoオーストークン
 const authToken = process.env.MOMENTO_AUTH_TOKEN;

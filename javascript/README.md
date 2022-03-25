@@ -6,12 +6,10 @@ _Read this in other languages_: [日本語](README.ja.md)
 
 ## Running the Example
 
-- Node version 10.13 or higher is required
+- Node version 16 or higher is required
 - A Momento Auth Token is required, you can generate one using the [Momento CLI](https://github.com/momentohq/momento-cli)
 
 ```bash
-# Set your npm registry
-npm config set @momento:registry https://momento.jfrog.io/artifactory/api/npm/npm-public/
 cd javascript
 npm install
 
@@ -26,14 +24,13 @@ Example Code: [index.ts](index.ts)
 ### Installation
 
 ```bash
-npm config set @momento:registry https://momento.jfrog.io/artifactory/api/npm/npm-public/
-npm install @momento/sdk
+npm install npm i @gomomento/sdk
 ```
 
 ### Usage
 
 ```typescript
-import { SimpleCacheClient, CacheGetStatus } from "@momento/sdk";
+import { SimpleCacheClient, CacheGetStatus } from "@gomomento/sdk";
 
 // your authentication token for momento
 const authToken = process.env.MOMENTO_AUTH_TOKEN;
