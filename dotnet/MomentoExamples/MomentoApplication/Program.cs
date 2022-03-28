@@ -19,7 +19,7 @@ namespace MomentoApplication
             {
                 client.CreateCache(CACHE_NAME);
             }
-            catch (AlreadyExistsException e)
+            catch (AlreadyExistsException)
             {
                 Console.WriteLine($"Cache with name {CACHE_NAME} already exists.");
             }
