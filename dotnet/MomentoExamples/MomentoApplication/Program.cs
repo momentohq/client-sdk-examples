@@ -1,5 +1,5 @@
 ﻿using System;
-using MomentoSdk;
+using MomentoSdk.Exceptions;
 using MomentoSdk.Responses;
 
 namespace MomentoApplication
@@ -15,7 +15,14 @@ namespace MomentoApplication
         static void Main(string[] args)
         {
             using SimpleCacheClient client = new SimpleCacheClient(MOMENTO_AUTH_TOKEN, DEFAULT_TTL_SECONDS);
-            client.CreateCache(CACHE_NAME);
+            try
+            {
+                client.CreateCache(CACHE_NAME);
+            }
+            catch (AlreadyExistsException)
+            {
+                Console.WriteLine($"Cache with name {CACHE_NAME} already exists.");
+            }
             Console.WriteLine($"Setting Key: {KEY} with Value: {VALUE}");
             client.Set(CACHE_NAME, KEY, VALUE);
             Console.WriteLine($"Get Value for  Key: {KEY}");
