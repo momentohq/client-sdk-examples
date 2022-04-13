@@ -11,6 +11,7 @@ namespace MomentoApplicationPresignedUrl
     {        
         private static readonly string SIGNING_KEY = Environment.GetEnvironmentVariable("SIGNING_KEY");
         private static readonly string ENDPOINT = Environment.GetEnvironmentVariable("ENDPOINT");
+
         private static readonly uint URL_TTL_MINUTES = 10;
         private static readonly string CACHE_NAME = "cache";
         private static readonly string OBJECT_KEY = "MyKey";
@@ -26,9 +27,11 @@ namespace MomentoApplicationPresignedUrl
 
         private static async Task RunPresignedUrlExample(Uri setUri, Uri getUri)
         {
-            Console.WriteLine($"Posting value with signed URL for {CacheOperation.SET}: {OBJECT_VALUE}");
+            // Currently Envoy does not support using raw bytes as request body with HTTP/2
+            // TODO: Remove Base64 encoding once we support REST endpoint with HTTP/1.1 only
             var json = JsonConvert.SerializeObject(Base64Encode(OBJECT_VALUE));
             var data = new StringContent(json, Encoding.UTF8, "application/json");
+            Console.WriteLine($"Posting value with signed URL for {CacheOperation.SET}: {OBJECT_VALUE}");
             var setResponse = await client.PostAsync(setUri, data);
             setResponse.EnsureSuccessStatusCode();
             
