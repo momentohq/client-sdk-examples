@@ -42,7 +42,7 @@ namespace MomentoApplicationPresignedUrl
             uint expiryEpochSeconds = (uint) DateTimeOffset.UtcNow.AddMinutes(URL_TTL_MINUTES).ToUnixTimeSeconds();
             var setReq = new SigningRequest(CACHE_NAME, OBJECT_KEY, CacheOperation.SET, expiryEpochSeconds) { TtlSeconds = OBJECT_TTL_SECONDS };
             var getReq = new SigningRequest(CACHE_NAME, OBJECT_KEY, CacheOperation.GET, expiryEpochSeconds);
-            Console.WriteLine($"Request claims: cache = {CACHE_NAME}, key = {OBJECT_KEY}, exp = {expiryEpochSeconds}, ttl (for set) = {OBJECT_TTL_SECONDS}");
+            Console.WriteLine($"Request claims: exp = {expiryEpochSeconds}, cache = {CACHE_NAME}, key = {OBJECT_KEY}, ttl (for set) = {OBJECT_TTL_SECONDS}");
 
             // create presigned urls
             MomentoSigner signer = new MomentoSigner(SIGNING_KEY);
@@ -51,9 +51,9 @@ namespace MomentoApplicationPresignedUrl
 
             Uri setUri, getUri;
             Uri.TryCreate(setUrl, UriKind.Absolute, out setUri);
-            Console.WriteLine($"Pre-signed URL for {CacheOperation.SET}:\n{setUrl}");
+            Console.WriteLine($"Signed URL for {CacheOperation.SET}:\n{setUri}");
             Uri.TryCreate(getUrl, UriKind.Absolute, out getUri);
-            Console.WriteLine($"Pre-signed URL for {CacheOperation.GET}:\n{getUrl}");
+            Console.WriteLine($"Signed URL for {CacheOperation.GET}:\n{getUri}");
 
             // set and get using presigned urls
             await RunPresignedUrlExample(setUri, getUri);
