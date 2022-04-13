@@ -2,7 +2,6 @@
 using System.Text;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using MomentoSdk;
 
 namespace MomentoApplicationPresignedUrl
@@ -20,18 +19,10 @@ namespace MomentoApplicationPresignedUrl
 
         private static readonly HttpClient client = new HttpClient();
 
-        private static string Base64Encode(string plainText) {
-            var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
-            return System.Convert.ToBase64String(plainTextBytes);
-        }
-
         private static async Task RunPresignedUrlExample(Uri setUri, Uri getUri)
         {
-            // Currently Envoy does not support using raw bytes as request body with HTTP/2
-            // TODO: Remove Base64 encoding once we support REST endpoint with HTTP/1.1 only
-            var json = JsonConvert.SerializeObject(Base64Encode(OBJECT_VALUE));
-            var data = new StringContent(json, Encoding.UTF8, "application/json");
             Console.WriteLine($"Posting value with signed URL for {CacheOperation.SET}: {OBJECT_VALUE}");
+            var data = new StringContent(OBJECT_VALUE, Encoding.UTF8, "application/json");
             var setResponse = await client.PostAsync(setUri, data);
             setResponse.EnsureSuccessStatusCode();
             
