@@ -27,6 +27,16 @@ const main = async () => {
     }
   }
 
+  console.log("Listing caches:");
+  let token;
+  do {
+    const listResp = await momento.listCaches();
+    listResp.getCaches().forEach((cacheInfo) => {
+      console.log(`${cacheInfo.getName()}`);
+    });
+    token = listResp.getNextToken();
+  } while (token != null);
+
   console.log(`Storing key=${cacheKey}, value=${cacheValue}, ttl=${ttl}`);
   await momento.set(cacheName, cacheKey, cacheValue);
   const getResp = await momento.get(cacheName, cacheKey);
