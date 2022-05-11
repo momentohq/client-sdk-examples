@@ -3,6 +3,10 @@ package momento.client.example;
 import momento.sdk.SimpleCacheClient;
 import momento.sdk.exceptions.AlreadyExistsException;
 import momento.sdk.messages.CacheGetResponse;
+import momento.sdk.messages.CacheInfo;
+import momento.sdk.messages.ListCachesResponse;
+
+import java.util.Optional;
 
 public class MomentoCacheApplication {
 
@@ -18,6 +22,8 @@ public class MomentoCacheApplication {
         SimpleCacheClient.builder(MOMENTO_AUTH_TOKEN, DEFAULT_ITEM_TTL_SECONDS).build()) {
 
       createCache(simpleCacheClient, CACHE_NAME);
+
+      listCaches(simpleCacheClient);
 
       System.out.println(String.format("Setting key=`%s` , value=`%s`", KEY, VALUE));
       simpleCacheClient.set(CACHE_NAME, KEY, VALUE);
@@ -38,6 +44,18 @@ public class MomentoCacheApplication {
     } catch (AlreadyExistsException e) {
       System.out.println(String.format("Cache with name `%s` already exists.", cacheName));
     }
+  }
+
+  private static void listCaches(SimpleCacheClient simpleCacheClient) {
+    System.out.println("Listing caches");
+    Optional<String> token = Optional.empty();
+    do {
+      ListCachesResponse listCachesResponse = simpleCacheClient.listCaches(token);
+      for (CacheInfo cacheInfo : listCachesResponse.caches()) {
+        System.out.println(cacheInfo.name());
+      }
+      token = listCachesResponse.nextPageToken();
+    } while (token.isPresent());
   }
 
   private static void printStartBanner() {
