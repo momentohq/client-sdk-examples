@@ -11,3 +11,5 @@ Example code for consuming momento SDK
 ## [Python Examples](python/)
 
 ## [Golang Examples](golang/)
+
+## [Rust Examples](rust/)
