@@ -47,7 +47,7 @@ public class MomentoCacheApplication {
   }
 
   private static void listCaches(SimpleCacheClient simpleCacheClient) {
-    System.out.println("Listing caches");
+    System.out.println("Listing caches:");
     Optional<String> token = Optional.empty();
     do {
       ListCachesResponse listCachesResponse = simpleCacheClient.listCaches(token);

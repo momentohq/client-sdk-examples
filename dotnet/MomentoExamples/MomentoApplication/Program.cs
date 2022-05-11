@@ -23,6 +23,17 @@ namespace MomentoApplication
             {
                 Console.WriteLine($"Cache with name {CACHE_NAME} already exists.");
             }
+            Console.WriteLine("Listing caches:");
+            String token = null;
+            do
+            {
+                ListCachesResponse resp = client.ListCaches(token);
+                foreach (CacheInfo cacheInfo in resp.Caches())
+                {
+                    Console.WriteLine(cacheInfo.Name());
+                }
+                token = resp.NextPageToken();
+            } while (!String.IsNullOrEmpty(token));
             Console.WriteLine($"Setting Key: {KEY} with Value: {VALUE}");
             client.Set(CACHE_NAME, KEY, VALUE);
             Console.WriteLine($"Get Value for  Key: {KEY}");
