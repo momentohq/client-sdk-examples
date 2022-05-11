@@ -84,12 +84,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - run: pushd rust
-      - name: rustfmt
-        run: cargo fmt -- --check
-      - name: Rigorous lint via Clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
-      - name: Build
+      - name: rustfmt -> rigorous lint via Clippy -> build
         run: |
-          cargo build --verbose
+          pushd rust
+            cargo fmt -- --check
+            cargo clippy --all-targets --all-features -- -D warnings
+            cargo build --verbose
           popd
