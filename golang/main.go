@@ -35,6 +35,22 @@ func main() {
 	}
 	log.Printf("Cache named %s is created\n", cacheName)
 
+	// List caches
+	token := ""
+	for {
+		listCacheResp, err := client.ListCaches(&momento.ListCachesRequest{NextToken: token})
+		if err != nil {
+			panic(err)
+		}
+		for _, cacheInfo := range listCacheResp.Caches() {
+			log.Printf("%s\n", cacheInfo.Name())
+		}
+		token = listCacheResp.NextToken()
+		if token == "" {
+			break
+		}
+	}
+
 	// Sets key with default TTL and gets value with that key
 	key := []byte(uuid.NewString())
 	value := []byte(uuid.NewString())
