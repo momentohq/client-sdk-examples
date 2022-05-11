@@ -78,3 +78,16 @@ jobs:
             dotnet build
           popd
         shell: bash
+
+  rust:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: rustfmt -> rigorous lint via Clippy -> build
+        run: |
+          pushd rust
+            cargo fmt -- --check
+            cargo clippy --all-targets --all-features -- -D warnings
+            cargo build --verbose
+          popd
