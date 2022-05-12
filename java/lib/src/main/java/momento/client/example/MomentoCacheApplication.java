@@ -1,12 +1,11 @@
 package momento.client.example;
 
+import java.util.Optional;
 import momento.sdk.SimpleCacheClient;
 import momento.sdk.exceptions.AlreadyExistsException;
 import momento.sdk.messages.CacheGetResponse;
 import momento.sdk.messages.CacheInfo;
 import momento.sdk.messages.ListCachesResponse;
-
-import java.util.Optional;
 
 public class MomentoCacheApplication {
 
