@@ -43,12 +43,26 @@ async def _create_cache(cache_client: scc.SimpleCacheClient, cache_name: str) ->
         print(f"Cache with name: {cache_name!r} already exists.")
 
 
+async def _list_caches(cache_client: scc.SimpleCacheClient) -> None:
+    print("Listing caches:")
+    list_cache_result = await cache_client.list_caches()
+    while True:
+        for cache_info in list_cache_result.caches():
+            print(f"- {cache_info.name()!r}")
+        next_token = list_cache_result.next_token()
+        if next_token is None:
+            break
+        list_cache_result = await cache_client.list_caches(next_token)
+    print()
+
+
 async def main() -> None:
     _print_start_banner()
     async with scc.init(
         _MOMENTO_AUTH_TOKEN, _ITEM_DEFAULT_TTL_SECONDS
     ) as cache_client:
         await _create_cache(cache_client, _CACHE_NAME)
+        await _list_caches(cache_client)
 
         print(f"Setting Key: {_KEY!r} Value: {_VALUE!r}")
         await cache_client.set(_CACHE_NAME, _KEY, _VALUE)
