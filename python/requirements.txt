@@ -1,1 +1,1 @@
-momento==0.10.0
+momento==0.11.1
