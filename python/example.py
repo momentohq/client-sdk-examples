@@ -38,7 +38,7 @@ def _create_cache(cache_client: scc.SimpleCacheClient, cache_name: str) -> None:
     try:
         cache_client.create_cache(cache_name)
     except errors.AlreadyExistsError:
-        print(f"Cache with name: `{cache_name}` already exists.")
+        print(f"Cache with name: {cache_name!r} already exists.")
 
 
 if __name__ == "__main__":
@@ -48,11 +48,11 @@ if __name__ == "__main__":
     ) as cache_client:
         _create_cache(cache_client, _CACHE_NAME)
 
-        print(f"Setting Key: {_KEY} Value: {_VALUE}")
+        print(f"Setting Key: {_KEY!r} Value: {_VALUE!r}")
         cache_client.set(_CACHE_NAME, _KEY, _VALUE)
 
-        print(f"Getting Key: {_KEY}")
+        print(f"Getting Key: {_KEY!r}")
         get_resp = cache_client.get(_CACHE_NAME, _KEY)
         print(f"Look up resulted in a : {str(get_resp.status())}")
-        print(f"Looked up Value: {str(get_resp.value())}")
+        print(f"Looked up Value: {str(get_resp.value())!r}")
     _print_end_banner()
