@@ -1,5 +1,5 @@
 import os
-import momento.simple_cache_client as simple_cache_client
+import momento.simple_cache_client as scc
 import momento.errors as errors
 import logging
 
@@ -22,28 +22,28 @@ if _DEBUG_MODE == "true":
     consoleHandler.setFormatter(formatter)
 
 
-def _print_start_banner():
+def _print_start_banner() -> None:
     print("******************************************************************")
     print("*                      Momento Example Start                     *")
     print("******************************************************************")
 
 
-def _print_end_banner():
+def _print_end_banner() -> None:
     print("******************************************************************")
     print("*                       Momento Example End                      *")
     print("******************************************************************")
 
 
-def _create_cache(simple_cache_client, cache_name):
+def _create_cache(cache_client: scc.SimpleCacheClient, cache_name: str) -> None:
     try:
-        simple_cache_client.create_cache(cache_name)
+        cache_client.create_cache(cache_name)
     except errors.AlreadyExistsError:
         print(f"Cache with name: `{cache_name}` already exists.")
 
 
 if __name__ == "__main__":
     _print_start_banner()
-    with simple_cache_client.init(
+    with scc.init(
         _MOMENTO_AUTH_TOKEN, _ITEM_DEFAULT_TTL_SECONDS
     ) as cache_client:
         _create_cache(cache_client, _CACHE_NAME)

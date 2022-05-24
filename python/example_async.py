@@ -2,7 +2,7 @@ import asyncio
 import logging
 import os
 
-import momento.aio.simple_cache_client as simple_cache_client
+import momento.aio.simple_cache_client as scc
 import momento.errors as errors
 
 _MOMENTO_AUTH_TOKEN = os.getenv("MOMENTO_AUTH_TOKEN")
@@ -24,28 +24,28 @@ if _DEBUG_MODE == "true":
     consoleHandler.setFormatter(formatter)
 
 
-def _print_start_banner():
+def _print_start_banner() -> None:
     print("******************************************************************")
     print("*                      Momento Example Start                     *")
     print("******************************************************************")
 
 
-def _print_end_banner():
+def _print_end_banner() -> None:
     print("******************************************************************")
     print("*                       Momento Example End                      *")
     print("******************************************************************")
 
 
-async def _create_cache(simple_cache_client, cache_name):
+async def _create_cache(cache_client: scc.SimpleCacheClient, cache_name: str) -> None:
     try:
-        await simple_cache_client.create_cache(cache_name)
+        await cache_client.create_cache(cache_name)
     except errors.AlreadyExistsError:
         print(f"Cache with name: `{cache_name}` already exists.")
 
 
-async def main():
+async def main() -> None:
     _print_start_banner()
-    async with simple_cache_client.init(
+    async with scc.init(
         _MOMENTO_AUTH_TOKEN, _ITEM_DEFAULT_TTL_SECONDS
     ) as cache_client:
         await _create_cache(cache_client, _CACHE_NAME)
