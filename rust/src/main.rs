@@ -32,6 +32,20 @@ async fn main() {
         }
     }
 
+    // List the caches
+    println!("Listing caches:");
+    match cache_client.list_caches(None).await {
+        Ok(list_cache_result) => {
+            for listed_cache in list_cache_result.caches {
+                println!("{}", listed_cache.cache_name);
+            }
+            println!();
+        }
+        Err(err) => {
+            eprintln!("{}", err);
+        }
+    }
+
     // Sets key with default TTL and get value with that key
     let key = String::from("my_key");
     let value = String::from("my_value");
