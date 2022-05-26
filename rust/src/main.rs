@@ -1,5 +1,5 @@
 use momento::response::cache_get_response::MomentoGetStatus;
-use momento::simple_cache_client::SimpleCacheClient;
+use momento::simple_cache_client::SimpleCacheClientBuilder;
 use std::env;
 use std::num::NonZeroU64;
 use std::process;
@@ -10,18 +10,17 @@ async fn main() {
     let auth_token =
         env::var("MOMENTO_AUTH_TOKEN").expect("env var MOMENTO_AUTH_TOKEN must be set");
     let item_default_ttl_seconds = 60;
-    let mut cache_client = match SimpleCacheClient::new(
+    let mut cache_client = match SimpleCacheClientBuilder::new(
         auth_token,
         NonZeroU64::new(item_default_ttl_seconds).unwrap(),
-    )
-    .await
-    {
-        Ok(c) => c,
+    ) {
+        Ok(client) => client,
         Err(err) => {
             eprintln!("{}", err);
             process::exit(1);
         }
-    };
+    }
+    .build();
 
     // Creating a cache named "cache"
     let cache_name = String::from("cache");
@@ -34,17 +33,25 @@ async fn main() {
 
     // List the caches
     println!("Listing caches:");
-    match cache_client.list_caches(None).await {
-        Ok(list_cache_result) => {
-            for listed_cache in list_cache_result.caches {
-                println!("{}", listed_cache.cache_name);
+    let mut next_token: Option<String> = None;
+    loop {
+        next_token = match cache_client.list_caches(next_token).await {
+            Ok(list_cache_result) => {
+                for listed_cache in list_cache_result.caches {
+                    println!("{}", listed_cache.cache_name);
+                }
+                list_cache_result.next_token
             }
-            println!();
-        }
-        Err(err) => {
-            eprintln!("{}", err);
+            Err(err) => {
+                eprintln!("{}", err);
+                break;
+            }
+        };
+        if next_token == None {
+            break;
         }
     }
+    println!();
 
     // Sets key with default TTL and get value with that key
     let key = String::from("my_key");
