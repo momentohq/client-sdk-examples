@@ -24,7 +24,7 @@ Example Code: [index.ts](index.ts)
 ### Installation
 
 ```bash
-npm install npm i @gomomento/sdk
+npm install @gomomento/sdk
 ```
 
 ### Usage
