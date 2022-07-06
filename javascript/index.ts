@@ -1,8 +1,4 @@
-import {
-  SimpleCacheClient,
-  CacheGetStatus,
-  AlreadyExistsError,
-} from "@gomomento/sdk";
+import {AlreadyExistsError, CacheGetStatus, LogLevel, LogFormat, SimpleCacheClient,} from '@gomomento/sdk';
 
 const cacheName = "cache";
 const cacheKey = "key";
@@ -14,7 +10,12 @@ if (!authToken) {
 }
 
 const defaultTtl = 60;
-const momento = new SimpleCacheClient(authToken, defaultTtl);
+const momento = new SimpleCacheClient(authToken, defaultTtl, {
+  loggerOptions: {
+    level: LogLevel.DEBUG,
+    format: LogFormat.CONSOLE
+  }
+});
 
 const main = async () => {
   try {
