@@ -9,7 +9,6 @@ import {
 const cacheName = 'cache';
 const cacheKey = 'key';
 const cacheValue = 'value';
-const ttl = 60;
 const authToken = process.env.MOMENTO_AUTH_TOKEN;
 if (!authToken) {
   throw new Error('Missing required environment variable MOMENTO_AUTH_TOKEN');
@@ -44,8 +43,11 @@ const main = async () => {
     token = listResp.getNextToken();
   } while (token !== null);
 
-  console.log(`Storing key=${cacheKey}, value=${cacheValue}, ttl=${ttl}`);
-  await momento.set(cacheName, cacheKey, cacheValue);
+  const exampleTtlSeconds = 10;
+  console.log(
+    `Storing key=${cacheKey}, value=${cacheValue}, ttl=${exampleTtlSeconds}`
+  );
+  await momento.set(cacheName, cacheKey, cacheValue, exampleTtlSeconds);
   const getResp = await momento.get(cacheName, cacheKey);
 
   if (getResp.status === CacheGetStatus.Hit) {
