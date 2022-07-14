@@ -15,7 +15,6 @@ import {
 import * as hdr from 'hdr-histogram-js';
 import {range} from './utils/collections';
 import {delay} from './utils/time';
-import {load} from '@grpc/grpc-js';
 
 interface BasicJavaScriptLoadGenOptions {
   loggerOptions: LoggerOptions;
@@ -95,7 +94,7 @@ class BasicJavaScriptLoadGen {
       await momento.createCache(this.cacheName);
     } catch (e) {
       if (e instanceof AlreadyExistsError) {
-        this.logger.info('cache already exists');
+        this.logger.info(`cache '${this.cacheName}' already exists`);
       } else {
         throw e;
       }
@@ -210,10 +209,10 @@ resource exhausted: ${
           loadGenContext.globalRstStreamCount
         )}%)
 
-set latencies:      
+cumulative set latencies:      
 ${BasicJavaScriptLoadGen.outputHistogramSummary(loadGenContext.setLatencies)}
 
-get latencies:
+cumulative get latencies:
 ${BasicJavaScriptLoadGen.outputHistogramSummary(loadGenContext.getLatencies)}
 `);
       }
@@ -231,19 +230,18 @@ ${BasicJavaScriptLoadGen.outputHistogramSummary(loadGenContext.getLatencies)}
     try {
       const setStartTime = process.hrtime();
       await client.set(this.cacheName, cacheKey, this.cacheValue);
-      const setEndTime = process.hrtime(setStartTime);
-      const setDuration = (setEndTime[0] * 1e9 + setEndTime[1]) / 1e6;
+      const setDuration = BasicJavaScriptLoadGen.getElapsedMillis(setStartTime);
       loadGenContext.setLatencies.recordValue(setDuration);
 
       const getStartTime = process.hrtime();
       const getResult = await client.get(this.cacheName, cacheKey);
-      const getEndTime = process.hrtime(getStartTime);
-      const getDuration = (getEndTime[0] * 1e9 + getEndTime[1]) / 1e6;
+      const getDuration = BasicJavaScriptLoadGen.getElapsedMillis(getStartTime);
       loadGenContext.getLatencies.recordValue(getDuration);
 
       let valueString: string;
       if (getResult.status === CacheGetStatus.Hit) {
-        const value = String(getResult.text());
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const value: string = getResult.text()!;
         valueString = `${value.substring(0, 10)}... (len: ${value.length})`;
       } else {
         valueString = 'n/a';
@@ -333,11 +331,15 @@ running on a single nodejs process.
 Note that because nodejs javascript code runs on a single thread, the limiting
 factor in request throughput will often be CPU.  Keep an eye on your CPU
 consumption while running the load generator, and if you reach 100%
-of a CPU core then you most likely won't be able to improve performance further
+of a CPU core then you most likely won't be able to improve throughput further
 without running additional nodejs processes.
 
-Also, since performance will be impacted by latency, you'll get the best results
-if you run on a cloud VM in the same region as your Momento cache.
+CPU will also impact your client-side latency; as you increase the number of
+concurrent requests, if they are competing for CPU time then the observed
+latency will increase.
+
+Also, since performance will be impacted by network latency, you'll get the best
+results if you run on a cloud VM in the same region as your Momento cache.
 
 Check out the configuration settings at the bottom of the 'load-gen.ts' to
 see how different configurations impact performance.
@@ -378,7 +380,7 @@ const loadGeneratorOptions: BasicJavaScriptLoadGenOptions = {
    * the load test.  Smaller payloads will generally provide lower latencies than
    * larger payloads.
    */
-  cacheItemPayloadBytes: 2500,
+  cacheItemPayloadBytes: 100,
   /**
    * Controls the number of concurrent requests that will be made (via asynchronous
    * function calls) by the load test.  Increasing this number may improve throughput,

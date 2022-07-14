@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@gomomento/generated-types": "0.20.0",
-    "@gomomento/sdk": "file:../../client-sdk-javascript",
+    "@gomomento/sdk": "0.14.0",
     "@grpc/grpc-js": "1.5.10",
     "hdr-histogram-js": "3.0.0"
   }
