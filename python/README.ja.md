@@ -10,17 +10,29 @@ _他言語バージョンもあります_：[English](README.md)
 - Momento オーストークンが必要です。トークン発行は[Momento CLI](https://github.com/momentohq/momento-cli)から行えます。
 
 ```bash
-python3 -m pip install -r requirements.txt
-MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> python3 example.py
+python3 -m pip install --user pipenv
+pipenv install
+```
+
+```bash
+MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> pipenv run python example.py
+MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> pipenv run python example_async.py
 ```
 
 SDK のデバッグログをオンするには、下記のように実行して下さい:
 
 ```bash
-DEBUG=true MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> python3 example.py
+DEBUG=true MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> pipenv run python example.py
+DEBUG=true MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> pipenv run python example_async.py
 ```
 
 ## SDK を自身のプロジェクトで使用する
+
+```bash
+pipenv install momento==0.12.0
+```
+
+or
 
 `momento==0.9.1`を`requirements.txt`に追加する、もしくは自身のプロジェクで使用しているディペンデンシー管理フレームワークに追加して下さい。
 
