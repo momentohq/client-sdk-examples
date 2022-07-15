@@ -7,6 +7,7 @@
     "prebuild": "eslint . --ext .ts",
     "build": "tsc",
     "example": "tsc && node dist/index.js",
+    "load-gen": "tsc && node dist/load-gen.js",
     "test": "jest",
     "lint": "eslint . --ext .ts",
     "format": "eslint . --ext .ts --fix"
@@ -25,6 +26,9 @@
     "typescript": "4.4.3"
   },
   "dependencies": {
-    "@gomomento/sdk": "0.13.0"
+    "@gomomento/generated-types": "0.20.0",
+    "@gomomento/sdk": "0.14.0",
+    "@grpc/grpc-js": "1.5.10",
+    "hdr-histogram-js": "3.0.0"
   }
 }
