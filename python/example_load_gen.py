@@ -49,6 +49,7 @@ class BasicPythonLoadGenContext:
 
 class BasicPythonLoadGen:
     cache_name = 'python-loadgen'
+    print_summary_every_n_requests = 1_000
 
     def __init__(self,
                  request_timeout_ms: int,
@@ -103,7 +104,7 @@ class BasicPythonLoadGen:
         for i in range(num_operations):
             await self.issue_async_set_get(client, context, worker_id, i + 1)
 
-            if context.global_request_count % 1_000 == 0:
+            if context.global_request_count % BasicPythonLoadGen.print_summary_every_n_requests == 0:
                 self.logger.info(f"""
 cumulative stats:
        total requests: {context.global_request_count} ({self.tps(context, context.global_request_count)} tps)
@@ -149,7 +150,7 @@ cumulative get latencies:
             else:
                 value_string = 'n/a'
 
-            if context.global_request_count % 1_000 == 0:
+            if context.global_request_count % BasicPythonLoadGen.print_summary_every_n_requests == 0:
                 self.logger.info(
                     f"worker: {worker_id}, worker request: {operation_id}, global request: {context.global_request_count}, status: {get_result.status()}, val: {value_string}"
                 )
@@ -201,6 +202,8 @@ cumulative get latencies:
 
     @staticmethod
     def percent_requests(context: BasicPythonLoadGenContext, count: int) -> float:
+        # multiply the ration by 100 to get a percentage.  Then multiply by 10, round, and divide by 10 to retain
+        # precision of one digit after the decimal.
         return round((count / context.global_request_count) * 100 * 10) / 10
 
     @staticmethod
