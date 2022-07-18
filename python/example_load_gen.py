@@ -202,9 +202,8 @@ cumulative get latencies:
 
     @staticmethod
     def percent_requests(context: BasicPythonLoadGenContext, count: int) -> float:
-        # multiply the ration by 100 to get a percentage.  Then multiply by 10, round, and divide by 10 to retain
-        # precision of one digit after the decimal.
-        return round((count / context.global_request_count) * 100 * 10) / 10
+        # multiply the ratio by 100 to get a percentage.  round to the nearest 0.1.
+        return round((count / context.global_request_count) * 100, 1)
 
     @staticmethod
     def output_histogram_summary(
@@ -216,6 +215,7 @@ cumulative get latencies:
       p50: {histogram.get_value_at_percentile(50)}
       p90: {histogram.get_value_at_percentile(90)}
       p99: {histogram.get_value_at_percentile(99)}
+    p99.9: {histogram.get_value_at_percentile(99.9)}
       max: {histogram.max_value}         
 """
 

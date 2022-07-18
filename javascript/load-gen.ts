@@ -334,6 +334,7 @@ ${BasicJavaScriptLoadGen.outputHistogramSummary(loadGenContext.getLatencies)}
     p50: ${histogram.getValueAtPercentile(50)}
     p90: ${histogram.getValueAtPercentile(90)}
     p99: ${histogram.getValueAtPercentile(99)}
+  p99.9: ${histogram.getValueAtPercentile(99.9)}
     max: ${histogram.maxValue}
 `;
   }
