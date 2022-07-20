@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "1afd8c0a5f0213dbd958c4e8cd7b45aebeb56fc6577f7f375c0991e73eaa11a4"
+            "sha256": "c477e696831c75b5fbf44916db913b4c9784ec5c042a695f15ae53586204b3bb"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -196,8 +196,12 @@
             "version": "==0.9.2"
         },
         "momento": {
-            "editable": true,
-            "path": "./../../client-sdk-python"
+            "hashes": [
+                "sha256:46c0584a4598ca575d0f72a32bf3e8ca156674b135196ef2e40925bdabe1e8a3",
+                "sha256:49d0cc2966a00e154b79809a9f59c1c538d718e91fac21428ec42951810fda3c"
+            ],
+            "index": "pypi",
+            "version": "==0.14.0"
         },
         "momento-wire-types": {
             "hashes": [
