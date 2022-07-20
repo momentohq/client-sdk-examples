@@ -62,8 +62,6 @@ class BasicJavaScriptLoadGen {
   constructor(options: BasicJavaScriptLoadGenOptions) {
     initializeMomentoLogging(options.loggerOptions);
     this.logger = getLogger('load-gen');
-    console.log('constructor');
-    this.logger.info('logger: constructor');
     const authToken = process.env.MOMENTO_AUTH_TOKEN;
     if (!authToken) {
       throw new Error(
@@ -100,7 +98,7 @@ class BasicJavaScriptLoadGen {
       }
     }
 
-    const numRequestsPerWorker =
+    const numOperationsPerWorker =
       this.totalNumberOfOperationsToExecute / this.numberOfConcurrentRequests;
 
     const loadGenContext: BasicJavasScriptLoadGenContext = {
@@ -121,7 +119,7 @@ class BasicJavaScriptLoadGen {
           momento,
           loadGenContext,
           workerId + 1,
-          numRequestsPerWorker
+          numOperationsPerWorker
         )
     );
     const allResultPromises = Promise.all(asyncGetSetResults);
@@ -135,64 +133,38 @@ class BasicJavaScriptLoadGen {
     client: SimpleCacheClient,
     loadGenContext: BasicJavasScriptLoadGenContext,
     workerId: number,
-    numRequests: number
-  ): Promise<number> {
-    let successCount = 0;
-    for (let i = 1; i <= numRequests; i++) {
-      const result = await this.issueAsyncSetGet(
-        client,
-        loadGenContext,
-        workerId,
-        i
-      );
-      loadGenContext.globalRequestCount++;
-      // TODO: this could be simplified and made more generic, worth doing if we ever want to
-      //  expand this to additional types of behavior
-      switch (result) {
-        case AsyncSetGetResult.SUCCESS:
-          successCount++;
-          loadGenContext.globalSuccessCount++;
-          break;
-        case AsyncSetGetResult.UNAVAILABLE:
-          loadGenContext.globalUnavailableCount++;
-          break;
-        case AsyncSetGetResult.DEADLINE_EXCEEDED:
-          loadGenContext.globalDeadlineExceededCount++;
-          break;
-        case AsyncSetGetResult.RESOURCE_EXHAUSTED:
-          loadGenContext.globalResourceExhaustedCount++;
-          break;
-        case AsyncSetGetResult.RST_STREAM:
-          loadGenContext.globalRstStreamCount++;
-          break;
-      }
+    numOperations: number
+  ): Promise<void> {
+    for (let i = 1; i <= numOperations; i++) {
+      await this.issueAsyncSetGet(client, loadGenContext, workerId, i);
+
       if (loadGenContext.globalRequestCount % 1000 === 0) {
         this.logger.info(`
-stats:
-       total: ${
-         loadGenContext.globalRequestCount
-       } (${BasicJavaScriptLoadGen.tps(
+cumulative stats:
+   total requests: ${
+     loadGenContext.globalRequestCount
+   } (${BasicJavaScriptLoadGen.tps(
           loadGenContext,
           loadGenContext.globalRequestCount
         )} tps)
-     success: ${
-       loadGenContext.globalSuccessCount
-     } (${BasicJavaScriptLoadGen.percentRequests(
+           success: ${
+             loadGenContext.globalSuccessCount
+           } (${BasicJavaScriptLoadGen.percentRequests(
           loadGenContext,
           loadGenContext.globalSuccessCount
         )}%) (${BasicJavaScriptLoadGen.tps(
           loadGenContext,
           loadGenContext.globalSuccessCount
         )} tps)
- unavailable: ${
-   loadGenContext.globalUnavailableCount
- } (${BasicJavaScriptLoadGen.percentRequests(
+       unavailable: ${
+         loadGenContext.globalUnavailableCount
+       } (${BasicJavaScriptLoadGen.percentRequests(
           loadGenContext,
           loadGenContext.globalUnavailableCount
         )}%)
-deadline exceeded: ${
-          loadGenContext.globalDeadlineExceededCount
-        } (${BasicJavaScriptLoadGen.percentRequests(
+ deadline exceeded: ${
+   loadGenContext.globalDeadlineExceededCount
+ } (${BasicJavaScriptLoadGen.percentRequests(
           loadGenContext,
           loadGenContext.globalDeadlineExceededCount
         )}%)
@@ -202,9 +174,9 @@ resource exhausted: ${
           loadGenContext,
           loadGenContext.globalResourceExhaustedCount
         )}%)
-  rst stream: ${
-    loadGenContext.globalRstStreamCount
-  } (${BasicJavaScriptLoadGen.percentRequests(
+        rst stream: ${
+          loadGenContext.globalRstStreamCount
+        } (${BasicJavaScriptLoadGen.percentRequests(
           loadGenContext,
           loadGenContext.globalRstStreamCount
         )}%)
@@ -217,27 +189,35 @@ ${BasicJavaScriptLoadGen.outputHistogramSummary(loadGenContext.getLatencies)}
 `);
       }
     }
-    return successCount;
   }
 
   private async issueAsyncSetGet(
     client: SimpleCacheClient,
     loadGenContext: BasicJavasScriptLoadGenContext,
     workerId: number,
-    requestId: number
-  ): Promise<AsyncSetGetResult> {
-    const cacheKey = `request${requestId}`;
-    try {
-      const setStartTime = process.hrtime();
-      await client.set(this.cacheName, cacheKey, this.cacheValue);
+    operationId: number
+  ): Promise<void> {
+    const cacheKey = `worker${workerId}operation${operationId}`;
+
+    const setStartTime = process.hrtime();
+    const result = await this.executeRequestAndUpdateContextCounts(
+      loadGenContext,
+      () => client.set(this.cacheName, cacheKey, this.cacheValue)
+    );
+    if (result !== undefined) {
       const setDuration = BasicJavaScriptLoadGen.getElapsedMillis(setStartTime);
       loadGenContext.setLatencies.recordValue(setDuration);
+    }
 
-      const getStartTime = process.hrtime();
-      const getResult = await client.get(this.cacheName, cacheKey);
+    const getStartTime = process.hrtime();
+    const getResult = await this.executeRequestAndUpdateContextCounts(
+      loadGenContext,
+      () => client.get(this.cacheName, cacheKey)
+    );
+
+    if (getResult !== undefined) {
       const getDuration = BasicJavaScriptLoadGen.getElapsedMillis(getStartTime);
       loadGenContext.getLatencies.recordValue(getDuration);
-
       let valueString: string;
       if (getResult.status === CacheGetStatus.Hit) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -248,19 +228,36 @@ ${BasicJavaScriptLoadGen.outputHistogramSummary(loadGenContext.getLatencies)}
       }
       if (loadGenContext.globalRequestCount % 1000 === 0) {
         this.logger.info(
-          `worker: ${workerId}, worker request: ${requestId}, global request: ${loadGenContext.globalRequestCount}, status: ${getResult.status}, val: ${valueString}`
+          `worker: ${workerId}, worker request: ${operationId}, global request: ${loadGenContext.globalRequestCount}, status: ${getResult.status}, val: ${valueString}`
         );
       }
-      return AsyncSetGetResult.SUCCESS;
+    }
+  }
+
+  private async executeRequestAndUpdateContextCounts<T>(
+    context: BasicJavasScriptLoadGenContext,
+    block: () => Promise<T>
+  ): Promise<T | undefined> {
+    const [result, response] = await this.executeRequest(block);
+    this.updateContextCountsForRequest(context, result);
+    return response;
+  }
+
+  private async executeRequest<T>(
+    block: () => Promise<T>
+  ): Promise<[AsyncSetGetResult, T | undefined]> {
+    try {
+      const result = await block();
+      return [AsyncSetGetResult.SUCCESS, result];
     } catch (e) {
       if (e instanceof InternalServerError) {
         if (e.message.includes('UNAVAILABLE')) {
-          return AsyncSetGetResult.UNAVAILABLE;
+          return [AsyncSetGetResult.UNAVAILABLE, undefined];
         } else if (e.message.includes('RST_STREAM')) {
           this.logger.error(
             `Caught RST_STREAM error; swallowing: ${e.name}, ${e.message}`
           );
-          return AsyncSetGetResult.RST_STREAM;
+          return [AsyncSetGetResult.RST_STREAM, undefined];
         } else {
           throw e;
         }
@@ -269,19 +266,45 @@ ${BasicJavaScriptLoadGen.outputHistogramSummary(loadGenContext.getLatencies)}
           this.logger.error(
             `Caught RESOURCE_EXHAUSTED error; swallowing: ${e.name}, ${e.message}`
           );
-          return AsyncSetGetResult.RESOURCE_EXHAUSTED;
+          return [AsyncSetGetResult.RESOURCE_EXHAUSTED, undefined];
         } else {
           throw e;
         }
       } else if (e instanceof TimeoutError) {
         if (e.message.includes('DEADLINE_EXCEEDED')) {
-          return AsyncSetGetResult.DEADLINE_EXCEEDED;
+          return [AsyncSetGetResult.DEADLINE_EXCEEDED, undefined];
         } else {
           throw e;
         }
       } else {
         throw e;
       }
+    }
+  }
+
+  private updateContextCountsForRequest(
+    context: BasicJavasScriptLoadGenContext,
+    result: AsyncSetGetResult
+  ): void {
+    context.globalRequestCount++;
+    // TODO: this could be simplified and made more generic, worth doing if we ever want to
+    //  expand this to additional types of behavior
+    switch (result) {
+      case AsyncSetGetResult.SUCCESS:
+        context.globalSuccessCount++;
+        break;
+      case AsyncSetGetResult.UNAVAILABLE:
+        context.globalUnavailableCount++;
+        break;
+      case AsyncSetGetResult.DEADLINE_EXCEEDED:
+        context.globalDeadlineExceededCount++;
+        break;
+      case AsyncSetGetResult.RESOURCE_EXHAUSTED:
+        context.globalResourceExhaustedCount++;
+        break;
+      case AsyncSetGetResult.RST_STREAM:
+        context.globalRstStreamCount++;
+        break;
     }
   }
 
@@ -311,6 +334,7 @@ ${BasicJavaScriptLoadGen.outputHistogramSummary(loadGenContext.getLatencies)}
     p50: ${histogram.getValueAtPercentile(50)}
     p90: ${histogram.getValueAtPercentile(90)}
     p99: ${histogram.getValueAtPercentile(99)}
+  p99.9: ${histogram.getValueAtPercentile(99.9)}
     max: ${histogram.maxValue}
 `;
   }
