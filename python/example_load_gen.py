@@ -8,9 +8,9 @@ from typing import Optional, TypeVar, Callable, Coroutine, Tuple
 
 import colorlog
 from hdrh.histogram import HdrHistogram
+import momento.errors
 from momento.aio import simple_cache_client
 from momento.cache_operation_types import CacheSetResponse, CacheGetResponse, CacheGetStatus
-from momento.errors import InternalServerError, AlreadyExistsError
 from momento.logs import initialize_momento_logging
 
 
@@ -73,13 +73,13 @@ class BasicPythonLoadGen:
         ) as cache_client:
             try:
                 await cache_client.create_cache(BasicPythonLoadGen.cache_name)
-            except AlreadyExistsError:
+            except momento.errors.AlreadyExistsError:
                 self.logger.info(f"Cache with name: {BasicPythonLoadGen.cache_name} already exists.")
 
             num_operations_per_worker = round(self.total_number_of_operations_to_execute /
                                               self.number_of_concurrent_requests)
             load_gen_context = BasicPythonLoadGenContext(
-                start_time=perf_counter(),
+                start_time=perf_counter_ns(),
                 get_latencies=HdrHistogram(1, 1000 * 60, 1),
                 set_latencies=HdrHistogram(1, 1000 * 60, 1),
                 global_request_count=0,
@@ -173,11 +173,11 @@ cumulative get latencies:
         try:
             result = await block()
             return AsyncSetGetResult.SUCCESS, result
-        except InternalServerError as e:
+        except momento.errors.InternalServerError as e:
             # TODO verify exception type
             self.logger.error(f"Caught InternalServerError: {e}")
             return AsyncSetGetResult.UNAVAILABLE, None
-        except TimeoutError as e:
+        except momento.errors.TimeoutError as e:
             # TODO need to verify exception type
             self.logger.error(f"Caught TimeoutError: {e}")
             return AsyncSetGetResult.DEADLINE_EXCEEDED, None
@@ -269,6 +269,7 @@ async def main(
         total_number_of_operations_to_execute=total_number_of_operations_to_execute
     )
     await load_generator.run()
+    print(PERFORMANCE_INFORMATION_MESSAGE)
 
 
 load_generator_options = dict(
