@@ -3,6 +3,8 @@ import momento.simple_cache_client as scc
 import momento.errors as errors
 import logging
 
+from momento.cache_operation_types import CacheSetResponse, CacheGetResponse, CacheGetStatus
+
 from example_utils.example_logging import initialize_logging
 
 _MOMENTO_AUTH_TOKEN = os.getenv("MOMENTO_AUTH_TOKEN")
@@ -56,10 +58,16 @@ if __name__ == "__main__":
         _list_caches(cache_client)
 
         _logger.info(f"Setting Key: {_KEY!r} Value: {_VALUE!r}")
-        cache_client.set(_CACHE_NAME, _KEY, _VALUE)
+        set_resp = cache_client.set(_CACHE_NAME, _KEY, _VALUE)
+        if set_resp.status == CacheSetStatus.ERROR:
+            _logger.warning(f"cache set for key {_KEY} resulted in {set_resp}")
 
         _logger.info(f"Getting Key: {_KEY!r}")
         get_resp = cache_client.get(_CACHE_NAME, _KEY)
-        _logger.info(f"Look up resulted in a : {str(get_resp.status())}")
-        _logger.info(f"Looked up Value: {str(get_resp.value())!r}")
+        if get_resp.status == CacheGetStatus.HIT:
+            _logger.info(f"Looked up Value: {str(get_resp.value())!r}")
+        elif get_resp.status == CacheGetStatus.MISS:
+            _logger.info(f"cache miss for key {_KEY}: {get_resp}")
+        elif get_resp.status == CacheGetStatus.ERROR:
+            _logger.warning(f"cache get for key {_KEY} resulted in {get_resp}")
     _print_end_banner()
