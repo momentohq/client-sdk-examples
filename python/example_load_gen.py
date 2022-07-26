@@ -3,10 +3,12 @@ import logging
 import os
 from dataclasses import dataclass
 from enum import Enum
-from time import perf_counter, perf_counter_ns
+from time import perf_counter_ns
 from typing import Optional, TypeVar, Callable, Coroutine, Tuple
 
 import colorlog
+import psutil
+import uvloop
 from hdrh.histogram import HdrHistogram
 import momento.errors
 from momento.aio import simple_cache_client
@@ -34,8 +36,21 @@ class AsyncSetGetResult(Enum):
 
 
 @dataclass
+class LoadGenDataPoint:
+    elapsed_millis: float
+    num_workers: int
+    asyncio_engine: str
+    request_count: int
+    tps: float
+    p50: int
+    p999: int
+
+
+@dataclass
 class BasicPythonLoadGenContext:
     start_time: float
+    num_workers: int
+    asyncio_engine: str
     get_latencies: HdrHistogram
     set_latencies: HdrHistogram
     # TODO: these could be generalized into a map structure that
@@ -45,19 +60,22 @@ class BasicPythonLoadGenContext:
     global_success_count: int
     global_unavailable_count: int
     global_deadline_exceeded_count: int
+    last_load_gen_data_point: Optional[LoadGenDataPoint]
 
 
 class BasicPythonLoadGen:
     cache_name = 'python-loadgen'
-    print_summary_every_n_requests = 1_000
+    print_summary_every_n_requests = 10_000
 
     def __init__(self,
+                 asyncio_engine: str,
                  request_timeout_ms: int,
                  cache_item_payload_bytes: int,
                  number_of_concurrent_requests: int,
                  total_number_of_operations_to_execute: int
                  ):
         self.logger = logging.getLogger('load-gen')
+        self.asyncio_engine = asyncio_engine
         self.auth_token = os.getenv('MOMENTO_AUTH_TOKEN')
         if not self.auth_token:
             raise ValueError('Missing required environment variable MOMENTO_AUTH_TOKEN')
@@ -80,12 +98,15 @@ class BasicPythonLoadGen:
                                               self.number_of_concurrent_requests)
             load_gen_context = BasicPythonLoadGenContext(
                 start_time=perf_counter_ns(),
+                num_workers=self.number_of_concurrent_requests,
+                asyncio_engine=self.asyncio_engine,
                 get_latencies=HdrHistogram(1, 1000 * 60, 1),
                 set_latencies=HdrHistogram(1, 1000 * 60, 1),
                 global_request_count=0,
                 global_success_count=0,
                 global_unavailable_count=0,
-                global_deadline_exceeded_count=0
+                global_deadline_exceeded_count=0,
+                last_load_gen_data_point=None
             )
 
             async_get_set_results = (
@@ -106,6 +127,8 @@ class BasicPythonLoadGen:
 
             if context.global_request_count % BasicPythonLoadGen.print_summary_every_n_requests == 0:
                 self.logger.info(f"""
+current cpu usage: {psutil.cpu_percent() * psutil.cpu_count()}                
+
 cumulative stats:
        total requests: {context.global_request_count} ({self.tps(context, context.global_request_count)} tps)
               success: {context.global_success_count} ({self.percent_requests(context, context.global_success_count)}%) ({self.tps(context, context.global_success_count)} tps)
@@ -118,6 +141,9 @@ cumulative set latencies:
 cumulative get latencies:
 {self.output_histogram_summary(context.get_latencies)}
 """)
+                context.last_load_gen_data_point = self.generate_and_output_latest_data_point(context)
+                context.get_latencies.reset()
+                context.set_latencies.reset()
 
     async def issue_async_set_get(
             self,
@@ -219,6 +245,27 @@ cumulative get latencies:
       max: {histogram.max_value}         
 """
 
+    def generate_and_output_latest_data_point(self, context: BasicPythonLoadGenContext) -> LoadGenDataPoint:
+        elapsed_millis = self.get_elapsed_millis(context.start_time)
+        if context.last_load_gen_data_point:
+            elapsed_millis_since_last_data_point = elapsed_millis - context.last_load_gen_data_point.elapsed_millis
+            requests_since_last_data_point = context.global_request_count - context.last_load_gen_data_point.request_count
+        else:
+            elapsed_millis_since_last_data_point = elapsed_millis
+            requests_since_last_data_point = context.global_request_count
+
+        new_data_point = LoadGenDataPoint(
+            elapsed_millis=elapsed_millis,
+            num_workers=context.num_workers,
+            asyncio_engine=context.asyncio_engine,
+            request_count=context.global_request_count,
+            tps=((requests_since_last_data_point * 1000) / elapsed_millis_since_last_data_point),
+            p50=context.get_latencies.get_value_at_percentile(50),
+            p999=context.get_latencies.get_value_at_percentile(99.9)
+        )
+        self.logger.info(f"Load gen data point: {new_data_point.elapsed_millis}\t{new_data_point.num_workers}\t{new_data_point.asyncio_engine}\t{new_data_point.request_count}\t{new_data_point.tps}\t{new_data_point.p50}\t{new_data_point.p999}")
+        return new_data_point
+
     @staticmethod
     def get_elapsed_millis(start_time: float) -> int:
         end_time = perf_counter_ns()
@@ -256,6 +303,7 @@ If you have questions or need help experimenting further, please reach out to us
 
 async def main(
         log_level: int,
+        asyncio_engine: str,
         request_timeout_ms: int,
         cache_item_payload_bytes: int,
         number_of_concurrent_requests: int,
@@ -263,6 +311,7 @@ async def main(
 ) -> None:
     initialize_logging(log_level)
     load_generator = BasicPythonLoadGen(
+        asyncio_engine=asyncio_engine,
         request_timeout_ms=request_timeout_ms,
         cache_item_payload_bytes=cache_item_payload_bytes,
         number_of_concurrent_requests=number_of_concurrent_requests,
@@ -273,6 +322,9 @@ async def main(
 
 
 load_generator_options = dict(
+    asyncio_engine='uvloop',
+    # asyncio_engine='default',
+
     #
     # This setting allows you to control the verbosity of the log output during
     # the load generator run. Available log levels are TRACE, DEBUG, INFO, WARN,
@@ -289,7 +341,7 @@ load_generator_options = dict(
     # the load test.  Smaller payloads will generally provide lower latencies than
     # larger payloads.
     #
-    cache_item_payload_bytes=100,
+    cache_item_payload_bytes=2500,
     #
     # Controls the number of concurrent requests that will be made (via asynchronous
     # function calls) by the load test.  Increasing this number may improve throughput,
@@ -297,15 +349,22 @@ load_generator_options = dict(
     # is more contention between the concurrent function calls, client-side latencies
     # may increase.
     #
+    # number_of_concurrent_requests=2_000,
+    # number_of_concurrent_requests=200,
+    # number_of_concurrent_requests=100,
     number_of_concurrent_requests=50,
+    # number_of_concurrent_requests=20,
     #
     # Controls how long the load test will run.  We will execute this many operations
     # (1 cache 'set' followed immediately by 1 'get') across all of our concurrent
     # workers before exiting.  Statistics will be logged every 1000 operations.
     #
-    total_number_of_operations_to_execute=50_000
+    total_number_of_operations_to_execute=400_000
 )
 
 
 if __name__ == "__main__":
+    # asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+    if load_generator_options['asyncio_engine'] == 'uvloop':
+        uvloop.install()
     asyncio.run(main(**load_generator_options))

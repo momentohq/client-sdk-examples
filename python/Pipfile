@@ -7,6 +7,8 @@ name = "pypi"
 colorlog = "==6.6.0"
 hdrhistogram = "*"
 momento = "==0.14.0"
+uvloop = "*"
+psutil = "*"
 
 [dev-packages]
 
