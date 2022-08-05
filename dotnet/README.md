@@ -7,7 +7,6 @@
 
 ```bash
 cd MomentoExamples
-dotnet nuget add source https://momento.jfrog.io/artifactory/api/nuget/nuget-public --name Momento-Artifactory
 dotnet build
 MOMENTO_AUTH_TOKEN=<YOUR AUTH TOKEN> dotnet run --project MomentoApplication
 ```
@@ -18,11 +17,10 @@ Example Code: [MomentoApplication](MomentoExamples/MomentoApplication/Program.cs
 
 SDK is built for target framework [.NET Standard 2.1](https://github.com/dotnet/standard/blob/v2.1.0/docs/versions/netstandard2.1.md)
 
-The Momento SDK is available at https://momento.jfrog.io/ui/repos/tree/General/nuget-public
+The Momento SDK is available at https://www.nuget.org/packages/Momento.Sdk/
 
 ### CLI command to add to your project
 
 ```
-dotnet nuget add source https://momento.jfrog.io/artifactory/api/nuget/nuget-public --name Momento-Artifactory
-dotnet add package MomentoSdk
+dotnet add package Momento.Sdk
 ```
