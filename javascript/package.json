@@ -32,6 +32,6 @@
     "@gomomento/sdk": "0.14.3",
     "@grpc/grpc-js": "1.5.10",
     "hdr-histogram-js": "3.0.0",
-    "node-fetch": "^2.6.7"
+    "node-fetch": "2.6.7"
   }
 }
