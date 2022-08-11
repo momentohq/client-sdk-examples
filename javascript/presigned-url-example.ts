@@ -18,7 +18,7 @@ const authToken = requireEnvVar('MOMENTO_AUTH_TOKEN');
 const defaultTtl = 60;
 const momento = new SimpleCacheClient(authToken, defaultTtl, {
   loggerOptions: {
-    level: LogLevel.DEBUG,
+    level: LogLevel.INFO,
     format: LogFormat.CONSOLE,
   },
 });
@@ -84,7 +84,7 @@ async function runPresignedUrlExample(signer: MomentoSigner, endpoint: string) {
     expiryEpochSeconds: expiryEpochSeconds,
   });
   console.log(
-    `Created signed urls with claims: exp = ${expiryEpochSeconds}, cache = ${cacheName}, key = ${cacheKey}, ttl (for set) = ${objectTtlSeconds}`
+    `Created signed urls with claims: exp = ${expiryEpochSeconds}, cache = ${cacheName}, key = ${cacheKey}, ttl seconds (for set) = ${objectTtlSeconds}`
   );
 
   console.log(
