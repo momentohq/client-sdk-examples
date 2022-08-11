@@ -1,24 +1,9 @@
 import {MomentoSigner, CacheOperation} from '@gomomento/sdk';
 import fetch, {Response} from 'node-fetch';
 
-const signingKey = process.env.MOMENTO_SIGNING_KEY;
-if (!signingKey) {
-  throw new Error('Missing required environment variable MOMENTO_SIGNING_KEY');
-}
-const signingEndpoint = process.env.MOMENTO_ENDPOINT || '';
-if (signingEndpoint === '') {
-  throw new Error('Missing required environment variable MOMENTO_ENDPOINT');
-}
-
-let cacheName: string;
-if (process.env.CACHE_NAME) {
-  cacheName = process.env.CACHE_NAME;
-} else {
-  cacheName = 'default-cache';
-  console.log(
-    `Environment variable CACHE_NAME not set. Using cache name '${cacheName}'.`
-  );
-}
+const signingKey = requireEnvVar('MOMENTO_SIGNING_KEY');
+const signingEndpoint = requireEnvVar('MOMENTO_ENDPOINT');
+const cacheName = getCacheName();
 const cacheKey = 'MyCacheKey';
 const cacheValue = 'MyCacheValue';
 const expiryEpochSeconds = Math.floor(Date.now() / 1000) + 10 * 60; // 10 minutes from now
@@ -101,13 +86,33 @@ async function runSignedTokenExample(signer: MomentoSigner) {
   console.log('Signed token example finished successfully!\n');
 }
 
+function requireEnvVar(envVarName: string): string {
+  const result = process.env[envVarName];
+  if (!result) {
+    throw new Error(`Missing required environment variable ${envVarName}`);
+  }
+  return result;
+}
+
+function getCacheName(): string {
+  if (process.env.CACHE_NAME) {
+    return process.env.CACHE_NAME;
+  } else {
+    const defaultCacheName = 'default-cache';
+    console.log(
+      `Environment variable CACHE_NAME not set. Using cache name '${defaultCacheName}'.`
+    );
+    return defaultCacheName;
+  }
+}
+
 function buildSetUrl(
   endpoint: string,
   cacheName: string,
   cacheKey: string,
   token: string,
   ttlSeconds: number
-) {
+): string {
   return `https://rest.${endpoint}/cache/set/${cacheName}/${cacheKey}?token=${token}&ttl_milliseconds=${
     ttlSeconds * 1000
   }`;
@@ -118,7 +123,7 @@ function buildGetUrl(
   cacheName: string,
   cacheKey: string,
   token: string
-) {
+): string {
   return `https://rest.${endpoint}/cache/get/${cacheName}/${cacheKey}?token=${token}`;
 }
 
