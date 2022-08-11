@@ -20,7 +20,7 @@ runs:
         # Required mail subject:
         subject: SDK Examples Build failed - ${{ github.job }} 
         # Required recipients' addresses:
-        to: pete@momentohq.com
+        to: eng-deveco@momentohq.com
         # Required sender full name (address can be skipped):
         from: Dev Eco
         # Optional whether this connection use TLS (default is true if server_port is 465)
