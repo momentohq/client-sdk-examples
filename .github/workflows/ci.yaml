@@ -7,10 +7,110 @@ on:
     branches: [main]
 
 jobs:
+  conditional_job_checks:
+    runs-on: ubuntu-latest
+    outputs:
+      python_changed: ${{ steps.check_changed.outputs.python_changed }}
+      dotnet_changed: ${{ steps.check_changed.outputs.dotnet_changed }}
+      golang_changed: ${{ steps.check_changed.outputs.golang_changed }}
+      java_changed: ${{ steps.check_changed.outputs.java_changed }}
+      javascript_changed: ${{ steps.check_changed.outputs.javascript_changed }}
+      rust_changed: ${{ steps.check_changed.outputs.rust_changed }}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
+    - shell: bash
+      id: check_changed
+      run: |
+        mydiffs=`git diff --name-only HEAD^ HEAD`
+        echo "::set-output name=python_changed::`echo "$mydiffs" | grep "^python/" | wc -l`"
+        echo "::set-output name=dotnet_changed::`echo "$mydiffs" | grep "^dotnet/" | wc -l`"
+        echo "::set-output name=golang_changed::`echo "$mydiffs" | grep "^golang/" | wc -l`"
+        echo "::set-output name=java_changed::`echo "$mydiffs" | grep "^java/" | wc -l`"
+        echo "::set-output name=javascript_changed::`echo "$mydiffs" | grep "^javascript/" | wc -l`"
+        echo "::set-output name=rust_changed::`echo "$mydiffs" | grep "^rust/" | wc -l`"
+
+  python:
+    runs-on: ubuntu-latest
+    needs: [conditional_job_checks]
+    if: ${{ needs.conditional_job_checks.outputs.python_changed != 0 }}
+    env:
+      # TODO: remove token stored as secret in favor of using a
+      # momento-local instance that can be spun up for testing
+      MOMENTO_AUTH_TOKEN: ${{ secrets.ALPHA_TEST_AUTH_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Python SDK sample
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
+      - name: Run samples
+        id: validation
+        continue-on-error: true
+        run: |
+          pushd python
+            python -m pip install --user pipenv
+            pipenv install
+            pipenv run python example.py
+            pipenv run python example_async.py
+          popd
+      - name: Send CI failure mail
+        if: ${{ steps.validation.outcome == 'failure' }}
+        uses: ./.github/error-email-action
+        with:
+          username: ${{secrets.MAIL_USERNAME}}
+          password: ${{secrets.MAIL_PASSWORD}}
+      - name: Flag Job Failure
+        if: ${{ steps.validation.outcome == 'failure' }}
+        run: exit 1
+
+  csharp:
+    runs-on: ubuntu-latest
+    needs: [conditional_job_checks]
+    if: ${{ needs.conditional_job_checks.outputs.dotnet_changed != 0 }}
+    env:
+      # TODO: remove token stored as secret in favor of using a
+      # momento-local instance that can be spun up for testing
+      MOMENTO_AUTH_TOKEN: ${{ secrets.ALPHA_TEST_AUTH_TOKEN }}
+
+    steps:
+      - name: Setup repo
+        uses: actions/checkout@v2
+
+      - name: Set up dotnet
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "6.0.x"
+
+      - name: Run samples
+        id: validation
+        continue-on-error: true
+        run: |
+          pushd dotnet/MomentoExamples
+            dotnet build
+            dotnet run --project MomentoApplication
+          popd
+        shell: bash
+      - name: Send CI failure mail
+        if: ${{ steps.validation.outcome == 'failure' }}
+        uses: ./.github/error-email-action
+        with:
+          username: ${{secrets.MAIL_USERNAME}}
+          password: ${{secrets.MAIL_PASSWORD}}
+      - name: Flag Job Failure
+        if: ${{ steps.validation.outcome == 'failure' }}
+        run: exit 1
+
   javascript:
     runs-on: ubuntu-latest
+    needs: [conditional_job_checks]
+    if: ${{ needs.conditional_job_checks.outputs.javascript_changed != 0 }}
     env:
-      TEST_AUTH_TOKEN: ${{ secrets.ALPHA_TEST_AUTH_TOKEN }}
+      # TODO: remove token stored as secret in favor of using a
+      # momento-local instance that can be spun up for testing
+      MOMENTO_AUTH_TOKEN: ${{ secrets.ALPHA_TEST_AUTH_TOKEN }}
 
     steps:
       - name: Setup repo
@@ -22,14 +122,26 @@ jobs:
           node-version: 16
 
       - name: Install Deps and Build
+        id: validation
         run: |
           pushd javascript
             npm ci
             npm run build
           popd
+      - name: Send CI failure mail
+        if: ${{ steps.validation.outcome == 'failure' }}
+        uses: ./.github/error-email-action
+        with:
+          username: ${{secrets.MAIL_USERNAME}}
+          password: ${{secrets.MAIL_PASSWORD}}
+      - name: Flag Job Failure
+        if: ${{ steps.validation.outcome == 'failure' }}
+        run: exit 1
 
   java:
     runs-on: ubuntu-latest
+    needs: [conditional_job_checks]
+    if: ${{ needs.conditional_job_checks.outputs.java_changed != 0 }}
 
     steps:
       - name: Setup repo
@@ -48,46 +160,42 @@ jobs:
           popd
 
       - name: Build with Gradle
+        id: validation
         run: |
           pushd java
             ./gradlew clean build
           popd
-
-  csharp:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Setup repo
-        uses: actions/checkout@v2
-
-      - name: Set up dotnet
-        uses: actions/setup-dotnet@v1
+      - name: Send CI failure mail
+        if: ${{ steps.validation.outcome == 'failure' }}
+        uses: ./.github/error-email-action
         with:
-          dotnet-version: "6.0.x"
-
-      - name: Configure Artifactory
-        run: |
-          set -e
-          set -x
-          dotnet nuget add source https://momento.jfrog.io/artifactory/api/nuget/nuget-public --name Artifactory
-        shell: bash
-
-      - name: Build
-        run: |
-          pushd dotnet/MomentoExamples
-            dotnet build
-          popd
-        shell: bash
+          username: ${{secrets.MAIL_USERNAME}}
+          password: ${{secrets.MAIL_PASSWORD}}
+      - name: Flag Job Failure
+        if: ${{ steps.validation.outcome == 'failure' }}
+        run: exit 1
 
   rust:
     runs-on: ubuntu-latest
+    needs: [conditional_job_checks]
+    if: ${{ needs.conditional_job_checks.outputs.rust_changed != 0 }}
 
     steps:
       - uses: actions/checkout@v2
       - name: rustfmt -> rigorous lint via Clippy -> build
+        id: validation
         run: |
           pushd rust
             cargo fmt -- --check
             cargo clippy --all-targets --all-features -- -D warnings
             cargo build --verbose
           popd
+      - name: Send CI failure mail
+        if: ${{ steps.validation.outcome == 'failure' }}
+        uses: ./.github/error-email-action
+        with:
+          username: ${{secrets.MAIL_USERNAME}}
+          password: ${{secrets.MAIL_PASSWORD}}
+      - name: Flag Job Failure
+        if: ${{ steps.validation.outcome == 'failure' }}
+        run: exit 1
