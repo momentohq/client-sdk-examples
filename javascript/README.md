@@ -19,6 +19,23 @@ MOMENTO_AUTH_TOKEN=<YOUR AUTH TOKEN> npm run example
 
 Example Code: [index.ts](index.ts)
 
+## Running the Presigned URL Example
+
+This example demonstrates how to use the `MomentoSigner` class, which enables creation of user-signed access tokens and presigned urls which can be used for doing cache get/set actions via HTTP.
+
+- Node version 16 or higher is required
+- A Momento Auth Token is required, you can generate one using the [Momento CLI](https://github.com/momentohq/momento-cli)
+
+```bash
+cd javascript
+npm install
+
+# Run example code
+MOMENTO_AUTH_TOKEN=<YOUR AUTH TOKEN> npm run presigned-url-example
+```
+
+Example Code: [presigned-url-example.ts](presigned-url-example.ts)
+
 ## Using the SDK in your projects
 
 ### Installation

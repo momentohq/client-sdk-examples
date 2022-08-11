@@ -7,6 +7,7 @@
     "prebuild": "eslint . --ext .ts",
     "build": "tsc",
     "example": "tsc && node dist/index.js",
+    "presigned-url-example": "tsc && node dist/presigned-url-example.js",
     "load-gen": "tsc && node dist/load-gen.js",
     "test": "jest",
     "lint": "eslint . --ext .ts",
@@ -16,6 +17,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^16.11.4",
+    "@types/node-fetch": "2.6.2",
     "@typescript-eslint/eslint-plugin": "5.30.5",
     "eslint": "8.19.0",
     "eslint-config-prettier": "8.5.0",
@@ -27,8 +29,9 @@
   },
   "dependencies": {
     "@gomomento/generated-types": "0.20.0",
-    "@gomomento/sdk": "0.14.3",
+    "@gomomento/sdk": "0.15.0",
     "@grpc/grpc-js": "1.5.10",
-    "hdr-histogram-js": "3.0.0"
+    "hdr-histogram-js": "3.0.0",
+    "node-fetch": "2.6.7"
   }
 }
