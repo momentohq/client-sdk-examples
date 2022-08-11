@@ -38,13 +38,15 @@ public static class Printing
 
     public static string PercentileDistributionToString(this LongHistogram histogram, double scalingFactor)
     {
-        var writer = new StringWriter();
-        histogram.OutputPercentileDistribution(
-            writer,
-            outputValueUnitScalingRatio: scalingFactor,
-            percentileTicksPerHalfDistance: 1
-        );
-        return writer.ToString();
+        using (var writer = new StringWriter())
+        {
+            histogram.OutputPercentileDistribution(
+                writer,
+                outputValueUnitScalingRatio: scalingFactor,
+                percentileTicksPerHalfDistance: 1
+            );
+            return writer.ToString();
+        }
     }
 
     public static void PrintDictionaryIfNotEmpty(this Dictionary<string, uint> dictionary, string title)

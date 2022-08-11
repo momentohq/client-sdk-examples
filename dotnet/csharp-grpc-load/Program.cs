@@ -1,21 +1,37 @@
 ﻿
-namespace application;
+namespace Momento.Grpc;
+
+enum TestMode
+{
+    Unary,
+    Dictionary,
+    ClientUnary,
+}
 
 class Program {
     static async Task Main(string[] args)
     {
         string endpoint;
+        TestMode testMode;
         string authToken;
         string cache;
         uint hz;
         uint reportInterval;
         uint clients;
         uint concurrency;
+        uint keyspace;
         try
         {
             endpoint = args.Where((arg) => arg.StartsWith("--endpoint="))
                     .First()
                     .Split("=")[1];
+
+            testMode = Enum.Parse<TestMode>(
+                args.Where((arg) => arg.StartsWith("--mode="))
+                    .First()
+                    .Split("=")[1],
+                true
+            );
 
             authToken = args.Where((arg) => arg.StartsWith("--token="))
                     .First()
@@ -49,23 +65,34 @@ class Program {
                     .FirstOrDefault("=100")
                     .Split("=")[1]
             );
+
+            keyspace = uint.Parse(
+                args.Where((arg) => arg.StartsWith("--keyspace="))
+                    .FirstOrDefault("=10000")
+                    .Split("=")[1]
+            );
         }
         catch (Exception)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Momento C# Load Generator\n");
+            Console.ResetColor();
             Console.WriteLine("Usage:");
             Console.WriteLine("  --endpoint=cache.cell-us-east-1-1.prod.a.momentohq.com  [required]");
             Console.WriteLine("  --token=your_momento_token                              [required]");
             Console.WriteLine("  --cache=cache_to_test                                   [required]");
+            Console.WriteLine("  --mode=unary                                            [required]");
+            Console.WriteLine("      One of: {0}", string.Join(',', Enum.GetNames<TestMode>()));
             Console.WriteLine("  --hz=2000                                               [100]");
-            Console.WriteLine("    Set the request rate to attempt");
+            Console.WriteLine("      Set the request rate to attempt");
             Console.WriteLine("  --clients=5                                             [processorcount - 1]");
-            Console.WriteLine("    Set the number of concurrent clients to use to attempt the configured hz");
+            Console.WriteLine("      Set the number of concurrent clients to use to attempt the configured hz");
             Console.WriteLine("  --concurrency=5                                         [100]");
-            Console.WriteLine("    Set the maximum number of concurrent h2 streams per client");
+            Console.WriteLine("      Set the maximum number of concurrent h2 streams per client");
             Console.WriteLine("  --interval=10                                           [10]");
-            Console.WriteLine("    Set the console report interval (in seconds)");
+            Console.WriteLine("      Set the console report interval (in seconds)");
+            Console.WriteLine("  --keyspace=100                                          [10000]");
+            Console.WriteLine("      Set the range of keys and values");
             Environment.Exit(1);
             throw new Exception("impossible");
         }
@@ -81,7 +108,7 @@ class Program {
             cancellationSource.Cancel();
         };
 
-        await new LoadGenerator(cancellationSource, endpoint, authToken, cache).Run(hz, reportInterval, clients, concurrency);
+        await new LoadGenerator(testMode, endpoint, authToken, cache, keyspace, cancellationSource).Run(hz, reportInterval, clients, concurrency);
 
         Console.WriteLine("All done");
     }
