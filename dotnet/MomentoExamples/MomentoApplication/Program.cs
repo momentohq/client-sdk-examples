@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using MomentoSdk;
-using MomentoSdk.Exceptions;
-using MomentoSdk.Responses;
+using Momento.Sdk;
+using Momento.Sdk.Exceptions;
+using Momento.Sdk.Responses;
 
 namespace MomentoApplication
 {
