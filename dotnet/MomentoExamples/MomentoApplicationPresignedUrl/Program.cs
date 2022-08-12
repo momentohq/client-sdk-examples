@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Text;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
-using MomentoSdk;
+using Momento.Sdk;
+using Momento.Sdk.Requests;
 
 namespace MomentoApplicationPresignedUrl
 {
@@ -51,7 +52,7 @@ namespace MomentoApplicationPresignedUrl
             }
 
             // prepare requests
-            uint expiryEpochSeconds = (uint) DateTimeOffset.UtcNow.AddMinutes(URL_TTL_MINUTES).ToUnixTimeSeconds();
+            uint expiryEpochSeconds = (uint)DateTimeOffset.UtcNow.AddMinutes(URL_TTL_MINUTES).ToUnixTimeSeconds();
             var setReq = new SigningRequest(cacheName, OBJECT_KEY, CacheOperation.SET, expiryEpochSeconds) { TtlSeconds = OBJECT_TTL_SECONDS };
             var getReq = new SigningRequest(cacheName, OBJECT_KEY, CacheOperation.GET, expiryEpochSeconds);
             Console.WriteLine($"Request claims: exp = {expiryEpochSeconds}, cache = {cacheName}, key = {OBJECT_KEY}, ttl (for set) = {OBJECT_TTL_SECONDS}");
