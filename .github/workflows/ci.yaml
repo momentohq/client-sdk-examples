@@ -89,8 +89,9 @@ jobs:
         continue-on-error: true
         run: |
           pushd dotnet/MomentoExamples
-            dotnet build
+            dotnet build MomentoApplication
             dotnet run --project MomentoApplication
+            dotnet build MomentoApplicationPresignedUrl
           popd
         shell: bash
       - name: Send CI failure mail
