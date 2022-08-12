@@ -9,6 +9,7 @@ using MomentoSdk;
 class LoadGenerator {
     private readonly CancellationTokenSource cancellationTokenSource;
     private readonly uint keyspace;
+    private readonly uint structuresize;
     private readonly string endpoint;
     private readonly RequestUtil util;
     private readonly TestMode testMode;
@@ -16,7 +17,7 @@ class LoadGenerator {
     private readonly SimpleCacheClient momentoClient;
     private readonly string cacheName;
 
-    public LoadGenerator(TestMode testMode, string endpoint, string authToken, string cache, uint keyspace, CancellationTokenSource cancellationTokenSource)
+    public LoadGenerator(TestMode testMode, string endpoint, string authToken, string cache, uint keyspace, uint structuresize, CancellationTokenSource cancellationTokenSource)
     {
         this.testMode = testMode;
         this.cancellationTokenSource = cancellationTokenSource;
@@ -28,9 +29,10 @@ class LoadGenerator {
         momentoClient = new SimpleCacheClient(authToken, 60);
         cacheName = cache;
 
-        Console.WriteLine($"Test mode: {testMode}, endpoint: {endpoint}, cache: {cache}, keyspace: {keyspace}");
+        Console.WriteLine($"Test mode: {testMode}, endpoint: {endpoint}, cache: {cache}, keyspace: {keyspace}, structuresize: {structuresize}");
 
         this.keyspace = keyspace;
+        this.structuresize = structuresize;
     }
 
     public async Task Run(uint hz, uint reportInterval, uint clients, uint concurrency) {
@@ -97,6 +99,7 @@ class LoadGenerator {
 
         var channel = new Grpc.Core.Channel(endpoint, Grpc.Core.ChannelCredentials.SecureSsl, new Grpc.Core.ChannelOption[] { new Grpc.Core.ChannelOption(Grpc.Core.ChannelOptions.Http2InitialSequenceNumber, number) });
         var client = new CacheClient.Scs.ScsClient(channel);
+        var random = new Random();
 
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -109,12 +112,11 @@ class LoadGenerator {
             }
 
             var stats = new Stats { concurrency = (uint)tasks.Count + 1 };
-            uint j = (uint)(i % keyspace);
             var oneJob = testMode switch
             {
-                TestMode.Unary => RunOneUnary(client, stats, j, cancellationToken),
-                TestMode.Dictionary => RunOneDictionary(client, stats, j, cancellationToken),
-                TestMode.ClientUnary => RunOneClientUnary(stats, j),
+                TestMode.Unary => RunOneUnary(client, stats, i, cancellationToken),
+                TestMode.Dictionary => RunOneDictionary(client, stats, i, random, cancellationToken),
+                TestMode.ClientUnary => RunOneClientUnary(stats, i),
                 // This is a bad thing in c#: Enums are not closed discrete data types.
                 _ => throw new NotImplementedException(testMode.ToString()),
             };
@@ -148,27 +150,32 @@ class LoadGenerator {
         return tasks.Except(completeTasks).ToHashSet();
     }
 
-    private async Task<Stats> RunOneUnary(CacheClient.Scs.ScsClient client, Stats stats, uint i, CancellationToken cancellationToken)
+    private async Task<Stats> RunOneUnary(CacheClient.Scs.ScsClient client, Stats stats, ulong i, CancellationToken cancellationToken)
     {
-        await Unary.Set(i, client, util, stats, cancellationToken);
+        uint item = (uint)(i % keyspace);
+        await Unary.Set(item, client, util, stats, cancellationToken);
 
-        await Unary.Get(i, client, util, stats, cancellationToken);
+        await Unary.Get(item, client, util, stats, cancellationToken);
         return stats;
     }
 
-    private async Task<Stats> RunOneDictionary(CacheClient.Scs.ScsClient client, Stats stats, uint i, CancellationToken cancellationToken)
+    private async Task<Stats> RunOneDictionary(CacheClient.Scs.ScsClient client, Stats stats, ulong i, Random random, CancellationToken cancellationToken)
     {
-        await Dictionary.Set(i, client, util, stats, cancellationToken);
+        uint dictionary = (uint)random.NextInt64(keyspace);
+        uint count = 3;
+        uint fieldStart = (uint)(i % (structuresize - count));
+        await Dictionary.Set(dictionary, fieldStart, count, client, util, stats, cancellationToken);
 
-        await Dictionary.Get(i, client, util, stats, cancellationToken);
+        await Dictionary.Get(dictionary, fieldStart, count, client, util, stats, cancellationToken);
         return stats;
     }
 
-    private async Task<Stats> RunOneClientUnary(Stats stats, uint i)
+    private async Task<Stats> RunOneClientUnary(Stats stats, ulong i)
     {
-        await Unary.ClientSet(i, momentoClient, cacheName, stats);
+        uint item = (uint)(i % keyspace);
+        await Unary.ClientSet(item, momentoClient, cacheName, stats);
 
-        await Unary.ClientGet(i, momentoClient, cacheName, stats);
+        await Unary.ClientGet(item, momentoClient, cacheName, stats);
         return stats;
     }
 }

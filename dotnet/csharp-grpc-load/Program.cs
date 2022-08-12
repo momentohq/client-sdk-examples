@@ -20,6 +20,7 @@ class Program {
         uint clients;
         uint concurrency;
         uint keyspace;
+        uint structuresize;
         try
         {
             endpoint = args.Where((arg) => arg.StartsWith("--endpoint="))
@@ -71,6 +72,12 @@ class Program {
                     .FirstOrDefault("=10000")
                     .Split("=")[1]
             );
+
+            structuresize = uint.Parse(
+                args.Where((arg) => arg.StartsWith("--structuresize="))
+                    .FirstOrDefault("=100")
+                    .Split("=")[1]
+            );
         }
         catch (Exception)
         {
@@ -92,7 +99,9 @@ class Program {
             Console.WriteLine("  --interval=10                                           [10]");
             Console.WriteLine("      Set the console report interval (in seconds)");
             Console.WriteLine("  --keyspace=100                                          [10000]");
-            Console.WriteLine("      Set the range of keys and values");
+            Console.WriteLine("      Set the range of keys and values. For data structures this is the count of data structures.");
+            Console.WriteLine("  --structuresize=100                                     [100]");
+            Console.WriteLine("      For data structures, sets the count of values in the data structure.");
             Environment.Exit(1);
             throw new Exception("impossible");
         }
@@ -108,7 +117,7 @@ class Program {
             cancellationSource.Cancel();
         };
 
-        await new LoadGenerator(testMode, endpoint, authToken, cache, keyspace, cancellationSource).Run(hz, reportInterval, clients, concurrency);
+        await new LoadGenerator(testMode, endpoint, authToken, cache, keyspace, structuresize, cancellationSource).Run(hz, reportInterval, clients, concurrency);
 
         Console.WriteLine("All done");
     }
