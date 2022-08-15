@@ -59,26 +59,49 @@ jobs:
             pipenv run python example.py
             pipenv run python example_async.py
           popd
-      - name: Lint with latest python
-        id: linting
+      - name: Mypy linting
+        id: mypy
         continue-on-error: true
-        if: ${{ matrix.python-version == '3.10' }}
+        if: ${{ matrix.python-version == '3.7' }}
         run: |
           pushd python
-            pipenv install mypy black flake8
+            pipenv install mypy
             pipenv run mypy .
+          popd
+      - name: Black linting
+        id: black
+        continue-on-error: true
+        if: ${{ matrix.python-version == '3.7' }}
+        run: |
+          pushd python
+            pipenv install black
             pipenv run black --check --diff .
+          popd
+      - name: Flake8 linting
+        id: flake8
+        continue-on-error: true
+        if: ${{ matrix.python-version == '3.7' }}
+        run: |
+          pushd python
+            pipenv install flake8
             pipenv run flake8
           popd
       - name: Send CI failure mail
-        if: ${{ steps.validation.outcome == 'failure' || steps.linting.outcome == 'failure' }}
+        if: ${{ steps.validation.outcome == 'failure' || steps.mypy.outcome == 'failure' || steps.black.outcome == 'failure' || steps.flake8.outcome == 'failure' }}
         uses: ./.github/error-email-action
         with:
           username: ${{secrets.MAIL_USERNAME}}
           password: ${{secrets.MAIL_PASSWORD}}
       - name: Flag Job Failure
-        if: ${{ steps.validation.outcome == 'failure' || steps.linting.outcome == 'failure' }}
-        run: exit 1
+        if: ${{ steps.validation.outcome == 'failure' || steps.mypy.outcome == 'failure' || steps.black.outcome == 'failure' || steps.flake8.outcome == 'failure' }}
+        run: |
+          echo "Job statuses"
+          echo "============"
+          echo "sample scripts: ${{ steps.validation.outcome }}"
+          echo "mypy: ${{ steps.mypy.outcome }}"
+          echo "black: ${{ steps.black.outcome }}"
+          echo "flake8: ${{ steps.flake8.outcome }}"
+          exit 1
 
   csharp:
     runs-on: ubuntu-latest
