@@ -9,6 +9,3 @@ hdrhistogram = "*"
 momento = "==0.14.0"
 
 [dev-packages]
-
-[requires]
-python_version = "3.9"
