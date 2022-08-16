@@ -116,6 +116,7 @@ class LoadGenerator {
             {
                 TestMode.Unary => RunOneUnary(client, stats, i, cancellationToken),
                 TestMode.Dictionary => RunOneDictionary(client, stats, i, random, cancellationToken),
+                TestMode.Set => RunOneSet(client, stats, i, random, cancellationToken),
                 TestMode.ClientUnary => RunOneClientUnary(stats, i),
                 // This is a bad thing in c#: Enums are not closed discrete data types.
                 _ => throw new NotImplementedException(testMode.ToString()),
@@ -167,6 +168,17 @@ class LoadGenerator {
         await Dictionary.Set(dictionary, fieldStart, count, client, util, stats, cancellationToken);
 
         await Dictionary.Get(dictionary, fieldStart, count, client, util, stats, cancellationToken);
+        return stats;
+    }
+
+    private async Task<Stats> RunOneSet(CacheClient.Scs.ScsClient client, Stats stats, ulong i, Random random, CancellationToken cancellationToken)
+    {
+        uint set = (uint)random.NextInt64(keyspace);
+        uint count = 3;
+        uint elementStart = (uint)(i % (structuresize - count));
+        await Set.Add(set, elementStart, count, client, util, stats, cancellationToken);
+
+        await Set.Get(set, elementStart, count, client, util, stats, cancellationToken);
         return stats;
     }
 

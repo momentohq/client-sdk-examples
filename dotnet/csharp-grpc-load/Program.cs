@@ -5,6 +5,7 @@ enum TestMode
 {
     Unary,
     Dictionary,
+    Set,
     ClientUnary,
 }
 
