@@ -36,7 +36,7 @@ DEBUG=true MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> pipenv run python example.py
 DEBUG=true MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> pipenv run python example_async.py
 ```
 
-## Running the Example Using requirements.txt
+## Running the Example Using pip
 
 - [Python 3.7 or above is required](https://www.python.org/downloads/)
 - A Momento Auth Token is required, you can generate one using the [Momento CLI](https://github.com/momentohq/momento-cli)
