@@ -52,9 +52,7 @@ async def _list_caches(cache_client: scc.SimpleCacheClient) -> None:
 async def main() -> None:
     initialize_logging()
     _print_start_banner()
-    async with scc.init(
-        _MOMENTO_AUTH_TOKEN, _ITEM_DEFAULT_TTL_SECONDS
-    ) as cache_client:
+    async with scc.init(_MOMENTO_AUTH_TOKEN, _ITEM_DEFAULT_TTL_SECONDS) as cache_client:
         await _create_cache(cache_client, _CACHE_NAME)
         await _list_caches(cache_client)
 

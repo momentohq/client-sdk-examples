@@ -33,38 +33,51 @@ jobs:
 
   python:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
     needs: [conditional_job_checks]
     if: ${{ needs.conditional_job_checks.outputs.python_changed != 0 }}
     env:
       # TODO: remove token stored as secret in favor of using a
       # momento-local instance that can be spun up for testing
       MOMENTO_AUTH_TOKEN: ${{ secrets.ALPHA_TEST_AUTH_TOKEN }}
-
     steps:
       - uses: actions/checkout@v2
       - name: Python SDK sample
         uses: actions/setup-python@v2
         with:
-          python-version: "3.9"
-      - name: Run samples
+          python-version: ${{ matrix.python-version }}
+      - name: Run samples for python ${{ matrix.python-version }}
         id: validation
         continue-on-error: true
         run: |
           pushd python
             python -m pip install --user pipenv
-            pipenv install
+            pipenv install --python ${{ matrix.python-version }}
             pipenv run python example.py
             pipenv run python example_async.py
           popd
+      - name: Run Linters
+        id: linters
+        if: ${{ matrix.python-version == '3.7' }}
+        uses: ./.github/actions/linters
       - name: Send CI failure mail
-        if: ${{ steps.validation.outcome == 'failure' }}
-        uses: ./.github/error-email-action
+        if: ${{ steps.validation.outcome == 'failure' || steps.linters.outputs.mypy == 'failure' || steps.linters.outputs.black == 'failure' || steps.linters.outputs.flake8 == 'failure' }}
+        uses: ./.github/actions/error-email-action
         with:
           username: ${{secrets.MAIL_USERNAME}}
           password: ${{secrets.MAIL_PASSWORD}}
       - name: Flag Job Failure
-        if: ${{ steps.validation.outcome == 'failure' }}
-        run: exit 1
+        if: ${{ steps.validation.outcome == 'failure' || steps.linters.outputs.mypy == 'failure' || steps.linters.outputs.black == 'failure' || steps.linters.outputs.flake8 == 'failure' }}
+        run: |
+          echo "Job statuses"
+          echo "============"
+          echo "sample scripts: ${{ steps.validation.outcome }}"
+          echo "mypy: ${{ steps.linters.outputs.mypy }}"
+          echo "black: ${{ steps.linters.outputs.black }}"
+          echo "flake8: ${{ steps.linters.outputs.flake8 }}"
+          exit 1
 
   csharp:
     runs-on: ubuntu-latest
@@ -96,7 +109,7 @@ jobs:
         shell: bash
       - name: Send CI failure mail
         if: ${{ steps.validation.outcome == 'failure' }}
-        uses: ./.github/error-email-action
+        uses: ./.github/actions/error-email-action
         with:
           username: ${{secrets.MAIL_USERNAME}}
           password: ${{secrets.MAIL_PASSWORD}}
@@ -124,6 +137,7 @@ jobs:
 
       - name: Install Deps and Build
         id: validation
+        continue-on-error: true
         run: |
           pushd javascript
             npm ci
@@ -131,7 +145,7 @@ jobs:
           popd
       - name: Send CI failure mail
         if: ${{ steps.validation.outcome == 'failure' }}
-        uses: ./.github/error-email-action
+        uses: ./.github/actions/error-email-action
         with:
           username: ${{secrets.MAIL_USERNAME}}
           password: ${{secrets.MAIL_PASSWORD}}
@@ -162,13 +176,14 @@ jobs:
 
       - name: Build with Gradle
         id: validation
+        continue-on-error: true
         run: |
           pushd java
             ./gradlew clean build
           popd
       - name: Send CI failure mail
         if: ${{ steps.validation.outcome == 'failure' }}
-        uses: ./.github/error-email-action
+        uses: ./.github/actions/error-email-action
         with:
           username: ${{secrets.MAIL_USERNAME}}
           password: ${{secrets.MAIL_PASSWORD}}
@@ -185,6 +200,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: rustfmt -> rigorous lint via Clippy -> build
         id: validation
+        continue-on-error: true
         run: |
           pushd rust
             cargo fmt -- --check
@@ -193,7 +209,7 @@ jobs:
           popd
       - name: Send CI failure mail
         if: ${{ steps.validation.outcome == 'failure' }}
-        uses: ./.github/error-email-action
+        uses: ./.github/actions/error-email-action
         with:
           username: ${{secrets.MAIL_USERNAME}}
           password: ${{secrets.MAIL_PASSWORD}}

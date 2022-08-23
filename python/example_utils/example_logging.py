@@ -20,8 +20,10 @@ def initialize_logging():
     root_logger.setLevel(log_level)
 
     handler = colorlog.StreamHandler()
-    handler.setFormatter(colorlog.ColoredFormatter(
-        "%(asctime)s %(log_color)s%(levelname)-8s%(reset)s %(thin_cyan)s%(name)s%(reset)s %(message)s"
-    ))
+    handler.setFormatter(
+        colorlog.ColoredFormatter(
+            "%(asctime)s %(log_color)s%(levelname)-8s%(reset)s %(thin_cyan)s%(name)s%(reset)s %(message)s"
+        )
+    )
     handler.setLevel(log_level)
     root_logger.addHandler(handler)

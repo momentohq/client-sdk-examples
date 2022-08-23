@@ -29,15 +29,15 @@ DEBUG=true MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> pipenv run python example_async.py
 ## SDK を自身のプロジェクトで使用する
 
 ```bash
-pipenv install momento==0.12.0
+pipenv install momento==0.14.0
 ```
 
 or
 
-`momento==0.9.1`を`requirements.txt`に追加する、もしくは自身のプロジェクで使用しているディペンデンシー管理フレームワークに追加して下さい。
+`momento==0.14.0`を`requirements.txt`に追加する、もしくは自身のプロジェクで使用しているディペンデンシー管理フレームワークに追加して下さい。
 
 自身のシステムに直接インストールする方法:
 
 ```bash
-pip install momento==0.9.1
+pip install momento==0.14.0
 ```

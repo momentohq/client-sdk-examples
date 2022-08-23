@@ -4,7 +4,7 @@ _Read this in other languages_: [日本語](README.ja.md)
 
 <br>
 
-## Running the Example
+## Running the Example Using Pipenv
 
 - [Python 3.7 or above is required](https://www.python.org/downloads/)
 - A Momento Auth Token is required, you can generate one using the [Momento CLI](https://github.com/momentohq/momento-cli)
@@ -36,22 +36,47 @@ DEBUG=true MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> pipenv run python example.py
 DEBUG=true MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> pipenv run python example_async.py
 ```
 
+## Running the Example Using pip
+
+- [Python 3.7 or above is required](https://www.python.org/downloads/)
+- A Momento Auth Token is required, you can generate one using the [Momento CLI](https://github.com/momentohq/momento-cli)
+
+To install prerequisites:
+
+```bash
+pip install -r requirements.txt
+```
+
+To run the examples:
+
+```bash
+MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> python example.py
+MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> python example_async.py
+```
+
+To run the examples with SDK debug logging enabled:
+
+```bash
+DEBUG=true MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> python example.py
+DEBUG=true MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> python example_async.py
+```
+
 ## Using SDK in your project
 
 via `pipenv`:
 
 ```bash
-pipenv install momento==0.12.0
+pipenv install momento==0.14.0
 ```
 
 via `pip` and `requirements.txt`:
 
-Add `momento==0.12.0` to `requirements.txt` or any other dependency management framework used by your project.
+Add `momento==0.14.0` to `requirements.txt` or any other dependency management framework used by your project.
 
 To install directly to your system:
 
 ```bash
-pip install --user momento==0.12.0
+pip install --user momento==0.14.0
 ```
 
 ## Running the load generator example
