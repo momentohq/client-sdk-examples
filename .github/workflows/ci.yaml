@@ -61,10 +61,10 @@ jobs:
       - name: Run Linters
         id: linters
         if: ${{ matrix.python-version == '3.7' }}
-        uses: ./.github/linters
+        uses: ./.github/actions/linters
       - name: Send CI failure mail
         if: ${{ steps.validation.outcome == 'failure' || steps.linters.outputs.mypy == 'failure' || steps.linters.outputs.black == 'failure' || steps.linters.outputs.flake8 == 'failure' }}
-        uses: ./.github/error-email-action
+        uses: ./.github/actions/error-email-action
         with:
           username: ${{secrets.MAIL_USERNAME}}
           password: ${{secrets.MAIL_PASSWORD}}
@@ -109,7 +109,7 @@ jobs:
         shell: bash
       - name: Send CI failure mail
         if: ${{ steps.validation.outcome == 'failure' }}
-        uses: ./.github/error-email-action
+        uses: ./.github/actions/error-email-action
         with:
           username: ${{secrets.MAIL_USERNAME}}
           password: ${{secrets.MAIL_PASSWORD}}
@@ -145,7 +145,7 @@ jobs:
           popd
       - name: Send CI failure mail
         if: ${{ steps.validation.outcome == 'failure' }}
-        uses: ./.github/error-email-action
+        uses: ./.github/actions/error-email-action
         with:
           username: ${{secrets.MAIL_USERNAME}}
           password: ${{secrets.MAIL_PASSWORD}}
@@ -183,7 +183,7 @@ jobs:
           popd
       - name: Send CI failure mail
         if: ${{ steps.validation.outcome == 'failure' }}
-        uses: ./.github/error-email-action
+        uses: ./.github/actions/error-email-action
         with:
           username: ${{secrets.MAIL_USERNAME}}
           password: ${{secrets.MAIL_PASSWORD}}
@@ -209,7 +209,7 @@ jobs:
           popd
       - name: Send CI failure mail
         if: ${{ steps.validation.outcome == 'failure' }}
-        uses: ./.github/error-email-action
+        uses: ./.github/actions/error-email-action
         with:
           username: ${{secrets.MAIL_USERNAME}}
           password: ${{secrets.MAIL_PASSWORD}}
