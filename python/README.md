@@ -15,7 +15,7 @@ sudo yum groupinstall "Development Tools"
 sudo yum install python3-devel
 ```
 **Ubuntu**
-```
+```bash
 sudo apt install build-essential
 sudo apt-get install python3-dev
 ```
