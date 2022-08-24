@@ -4,7 +4,8 @@ using System.Threading.Channels;
 using Bert.RateLimiters;
 using Momento.Grpc;
 using momento_csharp_load_generator.load.requests;
-using MomentoSdk;
+using Momento.Protos.CacheClient;
+using Momento.Sdk;
 
 class LoadGenerator {
     private readonly CancellationTokenSource cancellationTokenSource;
@@ -98,7 +99,7 @@ class LoadGenerator {
         ulong i = 0;
 
         var channel = new Grpc.Core.Channel(endpoint, Grpc.Core.ChannelCredentials.SecureSsl, new Grpc.Core.ChannelOption[] { new Grpc.Core.ChannelOption(Grpc.Core.ChannelOptions.Http2InitialSequenceNumber, number) });
-        var client = new CacheClient.Scs.ScsClient(channel);
+        var client = new Scs.ScsClient(channel);
         var random = new Random();
 
         while (!cancellationToken.IsCancellationRequested)
@@ -118,6 +119,7 @@ class LoadGenerator {
                 TestMode.Dictionary => RunOneDictionary(client, stats, i, random, cancellationToken),
                 TestMode.Set => RunOneSet(client, stats, i, random, cancellationToken),
                 TestMode.ClientUnary => RunOneClientUnary(stats, i),
+                TestMode.List => RunOneList(client, stats, i, random, cancellationToken),
                 // This is a bad thing in c#: Enums are not closed discrete data types.
                 _ => throw new NotImplementedException(testMode.ToString()),
             };
@@ -151,7 +153,7 @@ class LoadGenerator {
         return tasks.Except(completeTasks).ToHashSet();
     }
 
-    private async Task<Stats> RunOneUnary(CacheClient.Scs.ScsClient client, Stats stats, ulong i, CancellationToken cancellationToken)
+    private async Task<Stats> RunOneUnary(Scs.ScsClient client, Stats stats, ulong i, CancellationToken cancellationToken)
     {
         uint item = (uint)(i % keyspace);
         await Unary.Set(item, client, util, stats, cancellationToken);
@@ -160,7 +162,7 @@ class LoadGenerator {
         return stats;
     }
 
-    private async Task<Stats> RunOneDictionary(CacheClient.Scs.ScsClient client, Stats stats, ulong i, Random random, CancellationToken cancellationToken)
+    private async Task<Stats> RunOneDictionary(Scs.ScsClient client, Stats stats, ulong i, Random random, CancellationToken cancellationToken)
     {
         uint dictionary = (uint)random.NextInt64(keyspace);
         uint count = 3;
@@ -171,7 +173,7 @@ class LoadGenerator {
         return stats;
     }
 
-    private async Task<Stats> RunOneSet(CacheClient.Scs.ScsClient client, Stats stats, ulong i, Random random, CancellationToken cancellationToken)
+    private async Task<Stats> RunOneSet(Scs.ScsClient client, Stats stats, ulong i, Random random, CancellationToken cancellationToken)
     {
         uint set = (uint)random.NextInt64(keyspace);
         uint count = 3;
@@ -179,6 +181,16 @@ class LoadGenerator {
         await Set.Add(set, elementStart, count, client, util, stats, cancellationToken);
 
         await Set.Get(set, elementStart, count, client, util, stats, cancellationToken);
+        return stats;
+    }
+    private async Task<Stats> RunOneList(Scs.ScsClient client, Stats stats, ulong i, Random random, CancellationToken cancellationToken)
+    {
+        uint list = (uint)random.NextInt64(keyspace);
+        uint count = 3;
+        uint elementStart = (uint)(i % (structuresize - count));
+        await List.Add(list, elementStart, count, client, util, stats, cancellationToken);
+
+        await List.Get(list, elementStart, count, client, util, stats, cancellationToken);
         return stats;
     }
 

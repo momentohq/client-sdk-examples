@@ -1,7 +1,8 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text;
-using MomentoSdk;
+using Momento.Sdk;
+using Momento.Protos.CacheClient;
 
 namespace momento_csharp_load_generator.load.requests
 {
@@ -34,11 +35,11 @@ namespace momento_csharp_load_generator.load.requests
             return byteValues.GetOrAdd(i, j => Encoding.UTF8.GetBytes($"A value {j}"));
         }
 
-        public static async Task Set(uint i, CacheClient.Scs.ScsClient client, RequestUtil util, Stats stats, CancellationToken cancellationToken)
+        public static async Task Set(uint i, Scs.ScsClient client, RequestUtil util, Stats stats, CancellationToken cancellationToken)
         {
             try
             {
-                var request = new CacheClient._SetRequest
+                var request = new _SetRequest
                 {
                     TtlMilliseconds = 60000,
                     CacheKey = Key(i),
@@ -56,11 +57,11 @@ namespace momento_csharp_load_generator.load.requests
             }
         }
 
-        public static async Task Get(uint i, CacheClient.Scs.ScsClient client, RequestUtil util, Stats stats, CancellationToken cancellationToken)
+        public static async Task Get(uint i, Scs.ScsClient client, RequestUtil util, Stats stats, CancellationToken cancellationToken)
         {
             try
             {
-                var request = new CacheClient._GetRequest
+                var request = new _GetRequest
                 {
                     CacheKey = Key(i),
                 };
@@ -85,7 +86,7 @@ namespace momento_csharp_load_generator.load.requests
                 await momentoClient.SetAsync(cacheName, ByteKey(i), ByteValue(i));
                 stats.setLatencyTicks = Stopwatch.GetTimestamp() - startTimestamp;
             }
-            catch (MomentoSdk.Exceptions.SdkException e)
+            catch (Momento.Sdk.Exceptions.SdkException e)
             {
                 stats.setError = e;
             }
@@ -100,7 +101,7 @@ namespace momento_csharp_load_generator.load.requests
                 await momentoClient.GetAsync(cacheName, ByteKey(i));
                 stats.getLatencyTicks = Stopwatch.GetTimestamp() - startTimestamp;
             }
-            catch (MomentoSdk.Exceptions.SdkException e)
+            catch (Momento.Sdk.Exceptions.SdkException e)
             {
                 stats.getError = e;
             }

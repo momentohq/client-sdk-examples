@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using Momento.Protos.CacheClient;
 
 namespace momento_csharp_load_generator.load.requests
 {
@@ -25,19 +26,19 @@ namespace momento_csharp_load_generator.load.requests
             return dictionaryNames.GetOrAdd(i, j => Google.Protobuf.ByteString.CopyFromUtf8($"A dictionary {j}"));
         }
 
-        private static CacheClient._DictionaryFieldValuePair FieldValuePair(uint i)
+        private static _DictionaryFieldValuePair FieldValuePair(uint i)
         {
-            var v = new CacheClient._DictionaryFieldValuePair();
+            var v = new _DictionaryFieldValuePair();
             v.Field = Field(i);
             v.Value = Value(i);
             return v;
         }
 
-        public static async Task Set(uint dictionaryNumber, uint fieldStart, uint count, CacheClient.Scs.ScsClient client, RequestUtil util, Stats stats, CancellationToken cancellationToken)
+        public static async Task Set(uint dictionaryNumber, uint fieldStart, uint count, Scs.ScsClient client, RequestUtil util, Stats stats, CancellationToken cancellationToken)
         {
             try
             {
-                var request = new CacheClient._DictionarySetRequest
+                var request = new _DictionarySetRequest
                 {
                     TtlMilliseconds = 60000,
                     RefreshTtl = true,
@@ -60,11 +61,11 @@ namespace momento_csharp_load_generator.load.requests
             }
         }
 
-        public static async Task Get(uint dictionaryNumber, uint fieldStart, uint count, CacheClient.Scs.ScsClient client, RequestUtil util, Stats stats, CancellationToken cancellationToken)
+        public static async Task Get(uint dictionaryNumber, uint fieldStart, uint count, Scs.ScsClient client, RequestUtil util, Stats stats, CancellationToken cancellationToken)
         {
             try
             {
-                var request = new CacheClient._DictionaryGetRequest
+                var request = new _DictionaryGetRequest
                 {
                     DictionaryName = DictionaryName(dictionaryNumber),
                 };
