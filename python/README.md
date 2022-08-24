@@ -1,13 +1,31 @@
 # Python Client SDK
 
 _Read this in other languages_: [日本語](README.ja.md)
-
 <br>
 
-## Running the Example Using Pipenv
+## Prereqs
 
 - [Python 3.7 or above is required](https://www.python.org/downloads/)
 - A Momento Auth Token is required, you can generate one using the [Momento CLI](https://github.com/momentohq/momento-cli)
+- Developer libraries (gcc/python dev headers) installed on machine you intend to run on
+
+**Amazon Linux**
+```bash
+sudo yum groupinstall "Development Tools" 
+sudo yum install python3-devel
+```
+**Ubuntu**
+```bash
+sudo apt install build-essential
+sudo apt-get install python3-dev
+```
+**OSX**
+```bash
+xcode-select --install
+```
+
+## Running the Example Using Pipenv
+
 - This project uses [`pipenv`](https://packaging.python.org/en/latest/tutorials/managing-dependencies/) to manage dependencies.  This keeps your project dependencies separate from your system python packages.
 
 To install `pipenv` if you don't already have it:
@@ -37,11 +55,7 @@ DEBUG=true MOMENTO_AUTH_TOKEN=<YOUR_TOKEN> pipenv run python example_async.py
 ```
 
 ## Running the Example Using pip
-
-- [Python 3.7 or above is required](https://www.python.org/downloads/)
-- A Momento Auth Token is required, you can generate one using the [Momento CLI](https://github.com/momentohq/momento-cli)
-
-To install prerequisites:
+Install the prerequisites:
 
 ```bash
 pip install -r requirements.txt
