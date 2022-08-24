@@ -7,7 +7,7 @@ _Read this in other languages_: [日本語](README.ja.md)
 
 - [Python 3.7 or above is required](https://www.python.org/downloads/)
 - A Momento Auth Token is required, you can generate one using the [Momento CLI](https://github.com/momentohq/momento-cli)
-- Developer librarys (gcc/python dev headers) installed on machine you intend to run on
+- Developer libraries (gcc/python dev headers) installed on machine you intend to run on
 
 **Amazon Linux**
 ```bash
