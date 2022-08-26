@@ -328,7 +328,7 @@ load_generator_options = dict(
     # is more contention between the concurrent function calls, client-side latencies
     # may increase.
     #
-    number_of_concurrent_requests=50,
+    number_of_concurrent_requests=2,
     #
     # Controls how long the load test will run.  We will execute this many operations
     # (1 cache 'set' followed immediately by 1 'get') across all of our concurrent
