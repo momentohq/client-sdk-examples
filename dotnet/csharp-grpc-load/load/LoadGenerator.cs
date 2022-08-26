@@ -40,6 +40,22 @@ class LoadGenerator {
         var cancellationToken = cancellationTokenSource.Token;
 
         var metricsChannel = Channel.CreateUnbounded<Snapshot>();
+        
+        if (this.testMode == TestMode.List)
+        {
+            var random = new Random();
+            var channel = new Grpc.Core.Channel(endpoint, Grpc.Core.ChannelCredentials.SecureSsl, new Grpc.Core.ChannelOption[] { new Grpc.Core.ChannelOption(Grpc.Core.ChannelOptions.Http2InitialSequenceNumber, random.Next()) });
+            var client = new Scs.ScsClient(channel);
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            Console.WriteLine("precreating list");
+            for (int i = 0; i < this.keyspace; ++i)
+            {
+                await List.PrecreateList((uint)i, 0, structuresize, client, util, cancellationToken);
+            }
+            await channel.ShutdownAsync();
+            Console.WriteLine("done precreating list duration: {0}ms", stopwatch.ElapsedMilliseconds);
+        }
 
         var jobs = new List<Task>();
         for (int i = 0; i < clients; ++i) {
@@ -188,9 +204,9 @@ class LoadGenerator {
         uint list = (uint)random.NextInt64(keyspace);
         uint count = 3;
         uint elementStart = (uint)(i % (structuresize - count));
-        await List.Add(list, elementStart, count, client, util, stats, cancellationToken);
+        await List.Add(list, elementStart, client, util, stats, cancellationToken);
 
-        await List.Get(list, elementStart, count, client, util, stats, cancellationToken);
+        await List.Get(list, client, util, stats, cancellationToken);
         return stats;
     }
 
