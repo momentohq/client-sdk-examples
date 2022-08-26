@@ -39,6 +39,7 @@ class AsyncSetGetResult(Enum):
 class LoadGenDataPoint:
     elapsed_millis: float
     num_workers: int
+    num_clients: int
     asyncio_engine: str
     request_count: int
     tps: float
@@ -50,6 +51,7 @@ class LoadGenDataPoint:
 class BasicPythonLoadGenContext:
     start_time: float
     num_workers: int
+    num_clients: int
     asyncio_engine: str
     get_latencies: HdrHistogram
     set_latencies: HdrHistogram
@@ -65,14 +67,16 @@ class BasicPythonLoadGenContext:
 
 class BasicPythonLoadGen:
     cache_name = 'python-loadgen'
-    print_summary_every_n_requests = 10_000
+    # print_summary_every_n_requests = 10_000
+    print_summary_every_n_requests = 1_000
 
     def __init__(self,
                  asyncio_engine: str,
                  request_timeout_ms: int,
                  cache_item_payload_bytes: int,
                  number_of_concurrent_requests: int,
-                 total_number_of_operations_to_execute: int
+                 total_number_of_operations_to_execute: int,
+                 num_clients: int,
                  ):
         self.logger = logging.getLogger('load-gen')
         self.asyncio_engine = asyncio_engine
@@ -83,6 +87,7 @@ class BasicPythonLoadGen:
         self.number_of_concurrent_requests = number_of_concurrent_requests
         self.total_number_of_operations_to_execute = total_number_of_operations_to_execute
         self.cache_value = 'x' * cache_item_payload_bytes
+        self.num_clients = num_clients
 
     async def run(self) -> None:
         cache_item_ttl_seconds = 60
@@ -99,6 +104,7 @@ class BasicPythonLoadGen:
             load_gen_context = BasicPythonLoadGenContext(
                 start_time=perf_counter_ns(),
                 num_workers=self.number_of_concurrent_requests,
+                num_clients=self.num_clients,
                 asyncio_engine=self.asyncio_engine,
                 get_latencies=HdrHistogram(1, 1000 * 60, 1),
                 set_latencies=HdrHistogram(1, 1000 * 60, 1),
@@ -257,13 +263,14 @@ cumulative get latencies:
         new_data_point = LoadGenDataPoint(
             elapsed_millis=elapsed_millis,
             num_workers=context.num_workers,
+            num_clients=context.num_clients,
             asyncio_engine=context.asyncio_engine,
             request_count=context.global_request_count,
             tps=((requests_since_last_data_point * 1000) / elapsed_millis_since_last_data_point),
             p50=context.get_latencies.get_value_at_percentile(50),
             p999=context.get_latencies.get_value_at_percentile(99.9)
         )
-        self.logger.info(f"Load gen data point: {new_data_point.elapsed_millis}\t{new_data_point.num_workers}\t{new_data_point.asyncio_engine}\t{new_data_point.request_count}\t{new_data_point.tps}\t{new_data_point.p50}\t{new_data_point.p999}")
+        self.logger.info(f"Load gen data point: {new_data_point.elapsed_millis}\t{new_data_point.num_workers}\t{new_data_point.num_clients}\t{new_data_point.asyncio_engine}\t{new_data_point.request_count}\t{new_data_point.tps}\t{new_data_point.p50}\t{new_data_point.p999}")
         return new_data_point
 
     @staticmethod
@@ -307,7 +314,8 @@ async def main(
         request_timeout_ms: int,
         cache_item_payload_bytes: int,
         number_of_concurrent_requests: int,
-        total_number_of_operations_to_execute: int
+        total_number_of_operations_to_execute: int,
+        num_clients: int,
 ) -> None:
     initialize_logging(log_level)
     load_generator = BasicPythonLoadGen(
@@ -315,7 +323,8 @@ async def main(
         request_timeout_ms=request_timeout_ms,
         cache_item_payload_bytes=cache_item_payload_bytes,
         number_of_concurrent_requests=number_of_concurrent_requests,
-        total_number_of_operations_to_execute=total_number_of_operations_to_execute
+        total_number_of_operations_to_execute=total_number_of_operations_to_execute,
+        num_clients=num_clients
     )
     await load_generator.run()
     print(PERFORMANCE_INFORMATION_MESSAGE)
@@ -349,17 +358,23 @@ load_generator_options = dict(
     # is more contention between the concurrent function calls, client-side latencies
     # may increase.
     #
-    # number_of_concurrent_requests=2_000,
+    # number_of_concurrent_requests=5_000,
+    # number_of_concurrent_requests=500,
     # number_of_concurrent_requests=200,
     # number_of_concurrent_requests=100,
-    number_of_concurrent_requests=50,
-    # number_of_concurrent_requests=20,
+    # number_of_concurrent_requests=50,
+    number_of_concurrent_requests=20,
+    # number_of_concurrent_requests=10,
+    # number_of_concurrent_requests=1,
     #
     # Controls how long the load test will run.  We will execute this many operations
     # (1 cache 'set' followed immediately by 1 'get') across all of our concurrent
     # workers before exiting.  Statistics will be logged every 1000 operations.
     #
-    total_number_of_operations_to_execute=400_000
+    total_number_of_operations_to_execute=800_000,
+    # total_number_of_operations_to_execute=50_000,
+
+    num_clients=1
 )
 
 

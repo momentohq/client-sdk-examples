@@ -15,8 +15,12 @@ import {
 import * as hdr from 'hdr-histogram-js';
 import {range} from './utils/collections';
 import {delay} from './utils/time';
+import {ChannelOptions} from '@grpc/grpc-js';
+import * as osutils from 'node-os-utils';
 
 interface BasicJavaScriptLoadGenOptions {
+  numChannels: number;
+  channelOptions: Partial<ChannelOptions>;
   loggerOptions: LoggerOptions;
   requestTimeoutMs: number;
   cacheItemPayloadBytes: number;
@@ -33,6 +37,10 @@ enum AsyncSetGetResult {
 }
 
 interface BasicJavasScriptLoadGenContext {
+  numWorkers: number;
+  numChannels: number;
+  localSubChannelsEnabled: boolean;
+
   startTime: [number, number];
   getLatencies: hdr.Histogram;
   setLatencies: hdr.Histogram;
@@ -45,9 +53,26 @@ interface BasicJavasScriptLoadGenContext {
   globalDeadlineExceededCount: number;
   globalResourceExhaustedCount: number;
   globalRstStreamCount: number;
+  lastDataPoint: LoadGenDataPoint | undefined;
+}
+
+interface LoadGenDataPoint {
+  elapsedMillis: number;
+  numWorkers: number;
+  numChannels: number;
+  localSubChannelsEnabled: boolean;
+  requestCount: number;
+  tps: number;
+  p50: number;
+  p999: number;
 }
 
 class BasicJavaScriptLoadGen {
+  private readonly PRINT_SUMMARY_EVERY_N_REQUESTS = 10_000;
+
+  private readonly numChannels: number;
+  private readonly channelOptions: Partial<ChannelOptions>;
+
   private readonly logger: Logger;
   private readonly cacheItemTtlSeconds = 60;
   private readonly authToken: string;
@@ -58,10 +83,13 @@ class BasicJavaScriptLoadGen {
   private readonly cacheValue: string;
 
   private readonly cacheName: string = 'js-loadgen';
+  private cpuUsage = 0;
 
   constructor(options: BasicJavaScriptLoadGenOptions) {
     initializeMomentoLogging(options.loggerOptions);
     this.logger = getLogger('load-gen');
+    this.numChannels = options.numChannels;
+    this.channelOptions = options.channelOptions;
     const authToken = process.env.MOMENTO_AUTH_TOKEN;
     if (!authToken) {
       throw new Error(
@@ -79,10 +107,18 @@ class BasicJavaScriptLoadGen {
   }
 
   async run(): Promise<void> {
+    // const cpuUpdater = setInterval(() => {
+    //   osutils.cpu.usage(1000).then((usage: number) => {
+    //     this.cpuUsage = usage;
+    //   });
+    // }, 1000);
+
     const momento = new SimpleCacheClient(
       this.authToken,
       this.cacheItemTtlSeconds,
       {
+        numChannels: this.numChannels,
+        channelOptions: this.channelOptions,
         requestTimeoutMs: this.requestTimeoutMs,
         loggerOptions: this.loggerOptions,
       }
@@ -102,6 +138,11 @@ class BasicJavaScriptLoadGen {
       this.totalNumberOfOperationsToExecute / this.numberOfConcurrentRequests;
 
     const loadGenContext: BasicJavasScriptLoadGenContext = {
+      numWorkers: this.numberOfConcurrentRequests,
+      numChannels: this.numChannels,
+      localSubChannelsEnabled:
+        this.channelOptions['grpc.use_local_subchannel_pool'] === 1,
+
       startTime: process.hrtime(),
       getLatencies: hdr.build(),
       setLatencies: hdr.build(),
@@ -111,6 +152,7 @@ class BasicJavaScriptLoadGen {
       globalDeadlineExceededCount: 0,
       globalResourceExhaustedCount: 0,
       globalRstStreamCount: 0,
+      lastDataPoint: undefined,
     };
 
     const asyncGetSetResults = range(this.numberOfConcurrentRequests).map(
@@ -125,6 +167,7 @@ class BasicJavaScriptLoadGen {
     const allResultPromises = Promise.all(asyncGetSetResults);
     await allResultPromises;
     this.logger.info('DONE!');
+    // clearInterval(cpuUpdater);
     // wait a few millis to allow the logger to finish flushing
     await delay(500);
   }
@@ -137,57 +180,6 @@ class BasicJavaScriptLoadGen {
   ): Promise<void> {
     for (let i = 1; i <= numOperations; i++) {
       await this.issueAsyncSetGet(client, loadGenContext, workerId, i);
-
-      if (loadGenContext.globalRequestCount % 1000 === 0) {
-        this.logger.info(`
-cumulative stats:
-   total requests: ${
-     loadGenContext.globalRequestCount
-   } (${BasicJavaScriptLoadGen.tps(
-          loadGenContext,
-          loadGenContext.globalRequestCount
-        )} tps)
-           success: ${
-             loadGenContext.globalSuccessCount
-           } (${BasicJavaScriptLoadGen.percentRequests(
-          loadGenContext,
-          loadGenContext.globalSuccessCount
-        )}%) (${BasicJavaScriptLoadGen.tps(
-          loadGenContext,
-          loadGenContext.globalSuccessCount
-        )} tps)
-       unavailable: ${
-         loadGenContext.globalUnavailableCount
-       } (${BasicJavaScriptLoadGen.percentRequests(
-          loadGenContext,
-          loadGenContext.globalUnavailableCount
-        )}%)
- deadline exceeded: ${
-   loadGenContext.globalDeadlineExceededCount
- } (${BasicJavaScriptLoadGen.percentRequests(
-          loadGenContext,
-          loadGenContext.globalDeadlineExceededCount
-        )}%)
-resource exhausted: ${
-          loadGenContext.globalResourceExhaustedCount
-        } (${BasicJavaScriptLoadGen.percentRequests(
-          loadGenContext,
-          loadGenContext.globalResourceExhaustedCount
-        )}%)
-        rst stream: ${
-          loadGenContext.globalRstStreamCount
-        } (${BasicJavaScriptLoadGen.percentRequests(
-          loadGenContext,
-          loadGenContext.globalRstStreamCount
-        )}%)
-
-cumulative set latencies:      
-${BasicJavaScriptLoadGen.outputHistogramSummary(loadGenContext.setLatencies)}
-
-cumulative get latencies:
-${BasicJavaScriptLoadGen.outputHistogramSummary(loadGenContext.getLatencies)}
-`);
-      }
     }
   }
 
@@ -226,7 +218,13 @@ ${BasicJavaScriptLoadGen.outputHistogramSummary(loadGenContext.getLatencies)}
       } else {
         valueString = 'n/a';
       }
-      if (loadGenContext.globalRequestCount % 1000 === 0) {
+      if (
+        loadGenContext.globalRequestCount %
+          this.PRINT_SUMMARY_EVERY_N_REQUESTS ===
+          0 &&
+        loadGenContext.globalRequestCount <
+          this.totalNumberOfOperationsToExecute * 2
+      ) {
         this.logger.info(
           `worker: ${workerId}, worker request: ${operationId}, global request: ${loadGenContext.globalRequestCount}, status: ${getResult.status}, val: ${valueString}`
         );
@@ -306,6 +304,7 @@ ${BasicJavaScriptLoadGen.outputHistogramSummary(loadGenContext.getLatencies)}
         context.globalRstStreamCount++;
         break;
     }
+    this.outputSummaryIfIntervalReached(context);
   }
 
   private static tps(
@@ -327,6 +326,70 @@ ${BasicJavaScriptLoadGen.outputHistogramSummary(loadGenContext.getLatencies)}
     ).toString();
   }
 
+  private outputSummaryIfIntervalReached(
+    loadGenContext: BasicJavasScriptLoadGenContext
+  ): void {
+    if (
+      loadGenContext.globalRequestCount %
+        this.PRINT_SUMMARY_EVERY_N_REQUESTS ===
+      0
+    ) {
+      // current cpu usage: ${this.cpuUsage * osutils.cpu.count()}
+      this.logger.info(`
+cumulative stats:
+   total requests: ${
+     loadGenContext.globalRequestCount
+   } (${BasicJavaScriptLoadGen.tps(
+        loadGenContext,
+        loadGenContext.globalRequestCount
+      )} tps)
+           success: ${
+             loadGenContext.globalSuccessCount
+           } (${BasicJavaScriptLoadGen.percentRequests(
+        loadGenContext,
+        loadGenContext.globalSuccessCount
+      )}%) (${BasicJavaScriptLoadGen.tps(
+        loadGenContext,
+        loadGenContext.globalSuccessCount
+      )} tps)
+       unavailable: ${
+         loadGenContext.globalUnavailableCount
+       } (${BasicJavaScriptLoadGen.percentRequests(
+        loadGenContext,
+        loadGenContext.globalUnavailableCount
+      )}%)
+ deadline exceeded: ${
+   loadGenContext.globalDeadlineExceededCount
+ } (${BasicJavaScriptLoadGen.percentRequests(
+        loadGenContext,
+        loadGenContext.globalDeadlineExceededCount
+      )}%)
+resource exhausted: ${
+        loadGenContext.globalResourceExhaustedCount
+      } (${BasicJavaScriptLoadGen.percentRequests(
+        loadGenContext,
+        loadGenContext.globalResourceExhaustedCount
+      )}%)
+        rst stream: ${
+          loadGenContext.globalRstStreamCount
+        } (${BasicJavaScriptLoadGen.percentRequests(
+        loadGenContext,
+        loadGenContext.globalRstStreamCount
+      )}%)
+
+cumulative set latencies:      
+${BasicJavaScriptLoadGen.outputHistogramSummary(loadGenContext.setLatencies)}
+
+cumulative get latencies:
+${BasicJavaScriptLoadGen.outputHistogramSummary(loadGenContext.getLatencies)}
+`);
+      loadGenContext.lastDataPoint =
+        this.generateAndOutputLatestDataPoint(loadGenContext);
+      loadGenContext.getLatencies.reset();
+      loadGenContext.setLatencies.reset();
+    }
+  }
+
   private static outputHistogramSummary(histogram: hdr.Histogram): string {
     return `
   count: ${histogram.totalCount} 
@@ -337,6 +400,48 @@ ${BasicJavaScriptLoadGen.outputHistogramSummary(loadGenContext.getLatencies)}
   p99.9: ${histogram.getValueAtPercentile(99.9)}
     max: ${histogram.maxValue}
 `;
+  }
+
+  private generateAndOutputLatestDataPoint(
+    context: BasicJavasScriptLoadGenContext
+  ): LoadGenDataPoint {
+    const elapsedMillis = BasicJavaScriptLoadGen.getElapsedMillis(
+      context.startTime
+    );
+    let elapsedMillisSinceLastDataPoint, requestsSinceLastDataPoint;
+    if (context.lastDataPoint !== undefined) {
+      elapsedMillisSinceLastDataPoint =
+        elapsedMillis - context.lastDataPoint.elapsedMillis;
+      requestsSinceLastDataPoint =
+        context.globalRequestCount - context.lastDataPoint.requestCount;
+    } else {
+      elapsedMillisSinceLastDataPoint = elapsedMillis;
+      requestsSinceLastDataPoint = context.globalRequestCount;
+    }
+
+    const newDataPoint: LoadGenDataPoint = {
+      elapsedMillis: elapsedMillis,
+      numWorkers: context.numWorkers,
+      numChannels: context.numChannels,
+      localSubChannelsEnabled: context.localSubChannelsEnabled,
+      requestCount: context.globalRequestCount,
+      tps:
+        (requestsSinceLastDataPoint * 1000) / elapsedMillisSinceLastDataPoint,
+      p50: context.getLatencies.getValueAtPercentile(50),
+      p999: context.getLatencies.getValueAtPercentile(99.9),
+    };
+
+    console.log(
+      `Load gen data point: ${newDataPoint.elapsedMillis}\t${
+        newDataPoint.numWorkers
+      }\t${
+        newDataPoint.numChannels
+      }\t${newDataPoint.localSubChannelsEnabled.toString()}\t${
+        newDataPoint.requestCount
+      }\t${newDataPoint.tps}\t${newDataPoint.p50}\t${newDataPoint.p999}`
+    );
+
+    return newDataPoint;
   }
 
   private static getElapsedMillis(startTime: [number, number]): number {
@@ -377,6 +482,20 @@ async function main(loadGeneratorOptions: BasicJavaScriptLoadGenOptions) {
 }
 
 const loadGeneratorOptions: BasicJavaScriptLoadGenOptions = {
+  // numChannels: 6,
+  numChannels: 1,
+  channelOptions: {
+    // default value for max session memory is 10mb.  Under high load, it is easy to exceed this,
+    // after which point all requests will fail with a client-side RESOURCE_EXHAUSTED exception.
+    // This needs to be tunable: https://github.com/momentohq/dev-eco-issue-tracker/issues/85
+    'grpc-node.max_session_memory': 256,
+    // This flag controls whether channels use a shared global pool of subchannels, or whether
+    // each channel gets its own subchannel pool.  The default value is 0, meaning a single global
+    // pool.  Setting it to 1 provides significant performance improvements when we instantiate more
+    // than one grpc client.
+    'grpc.use_local_subchannel_pool': 1,
+  },
+
   /**
    * This setting allows you to control the verbosity of the log output during
    * the load generator run.
@@ -404,7 +523,7 @@ const loadGeneratorOptions: BasicJavaScriptLoadGenOptions = {
    * the load test.  Smaller payloads will generally provide lower latencies than
    * larger payloads.
    */
-  cacheItemPayloadBytes: 100,
+  cacheItemPayloadBytes: 2500,
   /**
    * Controls the number of concurrent requests that will be made (via asynchronous
    * function calls) by the load test.  Increasing this number may improve throughput,
@@ -418,7 +537,7 @@ const loadGeneratorOptions: BasicJavaScriptLoadGenOptions = {
    * (1 cache 'set' followed immediately by 1 'get') across all of our concurrent
    * workers before exiting.  Statistics will be logged every 1000 operations.
    */
-  totalNumberOfOperationsToExecute: 50_000,
+  totalNumberOfOperationsToExecute: 2_000_000,
 };
 
 main(loadGeneratorOptions)
