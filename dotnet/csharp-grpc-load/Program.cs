@@ -7,6 +7,7 @@ enum TestMode
     Dictionary,
     Set,
     ClientUnary,
+    ClientUnaryList,
     List,
 }
 

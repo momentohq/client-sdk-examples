@@ -12,8 +12,8 @@
     <PackageReference Include="Bert.RateLimiters" Version="1.0.15" />
     <PackageReference Include="Contrib.Grpc.Core.M1" Version="2.41.0" />
     <PackageReference Include="HdrHistogram" Version="2.5.0" />
-    <PackageReference Include="Momento.Protos" Version="0.27.2" />
-    <PackageReference Include="Momento.Sdk" Version="0.22.1" />
+    <PackageReference Include="Momento.Protos" Version="0.28.3" />
+    <PackageReference Include="Momento.Sdk" Version="0.24.3" />
   </ItemGroup>
 
   <ItemGroup>

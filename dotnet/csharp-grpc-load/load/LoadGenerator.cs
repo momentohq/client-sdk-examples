@@ -16,6 +16,7 @@ class LoadGenerator {
     private readonly TestMode testMode;
 
     private readonly SimpleCacheClient momentoClient;
+    private readonly Momento.Sdk.Incubating.SimpleCacheClient incubatingClient;
     private readonly string cacheName;
 
     public LoadGenerator(TestMode testMode, string endpoint, string authToken, string cache, uint keyspace, uint structuresize, CancellationTokenSource cancellationTokenSource)
@@ -28,6 +29,7 @@ class LoadGenerator {
         headers.Add(new Grpc.Core.Metadata.Entry("cache", cache));
         util = new RequestUtil(headers);
         momentoClient = new SimpleCacheClient(authToken, 60);
+        this.incubatingClient = new Momento.Sdk.Incubating.SimpleCacheClient(momentoClient, authToken, 60);
         cacheName = cache;
 
         Console.WriteLine($"Test mode: {testMode}, endpoint: {endpoint}, cache: {cache}, keyspace: {keyspace}, structuresize: {structuresize}");
@@ -41,7 +43,7 @@ class LoadGenerator {
 
         var metricsChannel = Channel.CreateUnbounded<Snapshot>();
         
-        if (this.testMode == TestMode.List)
+        if (this.testMode == TestMode.List || this.testMode == TestMode.ClientUnaryList)
         {
             var random = new Random();
             var channel = new Grpc.Core.Channel(endpoint, Grpc.Core.ChannelCredentials.SecureSsl, new Grpc.Core.ChannelOption[] { new Grpc.Core.ChannelOption(Grpc.Core.ChannelOptions.Http2InitialSequenceNumber, random.Next()) });
@@ -135,6 +137,7 @@ class LoadGenerator {
                 TestMode.Dictionary => RunOneDictionary(client, stats, i, random, cancellationToken),
                 TestMode.Set => RunOneSet(client, stats, i, random, cancellationToken),
                 TestMode.ClientUnary => RunOneClientUnary(stats, i),
+                TestMode.ClientUnaryList => RunOneClientUnaryList(stats, i),
                 TestMode.List => RunOneList(client, stats, i, random, cancellationToken),
                 // This is a bad thing in c#: Enums are not closed discrete data types.
                 _ => throw new NotImplementedException(testMode.ToString()),
@@ -216,6 +219,14 @@ class LoadGenerator {
         await Unary.ClientSet(item, momentoClient, cacheName, stats);
 
         await Unary.ClientGet(item, momentoClient, cacheName, stats);
+        return stats;
+    }
+    
+    private async Task<Stats> RunOneClientUnaryList(Stats stats, ulong i)
+    {
+        uint item = (uint)(i % keyspace);
+        await Unary.ClientListAdd(item, incubatingClient, cacheName, stats);
+        await Unary.ClientListFetch(item, incubatingClient, cacheName, stats);
         return stats;
     }
 }

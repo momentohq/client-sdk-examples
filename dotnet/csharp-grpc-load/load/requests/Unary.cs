@@ -106,6 +106,26 @@ namespace momento_csharp_load_generator.load.requests
                 stats.getError = e;
             }
         }
+
+        public static async Task ClientListAdd(uint i, Momento.Sdk.Incubating.SimpleCacheClient momentoClient, string cacheName, Stats stats)
+        {
+            var listName = i.ToString();
+            var value = i.ToString();
+            var startPushFrontTimestamp = Stopwatch.GetTimestamp();
+            await momentoClient.ListPushFrontAsync(cacheName, listName, value, true);
+            stats.setLatencyTicks = Stopwatch.GetTimestamp() - startPushFrontTimestamp;
+
+            var startPopBackTimestamp = Stopwatch.GetTimestamp();
+            await momentoClient.ListPopBackAsync(cacheName, listName);
+            stats.setLatencyTicks = Stopwatch.GetTimestamp() - startPopBackTimestamp;
+        }
+        
+        public static async Task ClientListFetch(uint i, Momento.Sdk.Incubating.SimpleCacheClient momentoClient, string cacheName, Stats stats)
+        {
+            var listName = i.ToString();
+            var startTimestamp = Stopwatch.GetTimestamp();
+            await momentoClient.ListFetchAsync(cacheName, listName);
+            stats.getLatencyTicks = Stopwatch.GetTimestamp() - startTimestamp;
+        }
     }
 }
-
