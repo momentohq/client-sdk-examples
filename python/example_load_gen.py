@@ -222,7 +222,7 @@ cumulative get latencies:
             # self.logger.error(f"Caught LimitExceededError: {e}")
             if context.global_throttle_count % 5_000 == 0:
                 self.logger.warning(f"Received limit exceeded responses from the server.")
-                self.logger.warning("Default limit is 100tps; please contact Momento for a limit increase!")
+                self.logger.warning("Default limit is 100tps; please contact support@momentohq.com for a limit increase!")
             return AsyncSetGetResult.THROTTLE, None
 
     @staticmethod
