@@ -205,7 +205,9 @@ cumulative get latencies:
         return response
 
     async def execute_request(
-        self, context: BasicPythonLoadGenContext, block: Callable[[], Coroutine[None, None, T]]
+        self,
+        context: BasicPythonLoadGenContext,
+        block: Callable[[], Coroutine[None, None, T]],
     ) -> Tuple[AsyncSetGetResult, Optional[T]]:
         try:
             result = await block()
@@ -218,11 +220,14 @@ cumulative get latencies:
             # TODO need to verify exception type
             self.logger.error(f"Caught TimeoutError: {e}")
             return AsyncSetGetResult.DEADLINE_EXCEEDED, None
-        except momento.errors.LimitExceededError as e:
-            # self.logger.error(f"Caught LimitExceededError: {e}")
+        except momento.errors.LimitExceededError:
             if context.global_throttle_count % 5_000 == 0:
-                self.logger.warning(f"Received limit exceeded responses from the server.")
-                self.logger.warning("Default limit is 100tps; please contact support@momentohq.com for a limit increase!")
+                self.logger.warning(
+                    "Received limit exceeded responses from the server."
+                )
+                self.logger.warning(
+                    "Default limit is 100tps; please contact support@momentohq.com for a limit increase!"
+                )
             return AsyncSetGetResult.THROTTLE, None
 
     @staticmethod
