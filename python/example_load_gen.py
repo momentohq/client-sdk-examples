@@ -37,6 +37,7 @@ class AsyncSetGetResult(Enum):
     SUCCESS = ("SUCCESS",)
     UNAVAILABLE = ("UNAVAILABLE",)
     DEADLINE_EXCEEDED = ("DEADLINE_EXCEEDED",)
+    THROTTLE = ("THROTTLE",)
 
 
 @dataclass
@@ -51,6 +52,7 @@ class BasicPythonLoadGenContext:
     global_success_count: int
     global_unavailable_count: int
     global_deadline_exceeded_count: int
+    global_throttle_count: int
 
 
 class BasicPythonLoadGen:
@@ -99,6 +101,7 @@ class BasicPythonLoadGen:
                 global_success_count=0,
                 global_unavailable_count=0,
                 global_deadline_exceeded_count=0,
+                global_throttle_count=0,
             )
 
             async_get_set_results = (
@@ -135,6 +138,8 @@ cumulative stats:
               success: {context.global_success_count} ({self.percent_requests(context, context.global_success_count)}%) ({self.tps(context, context.global_success_count)} tps)
           unavailable: {context.global_unavailable_count} ({self.percent_requests(context, context.global_unavailable_count)}%)
     deadline exceeded: {context.global_deadline_exceeded_count} ({self.percent_requests(context, context.global_deadline_exceeded_count)}%)
+            throttled: {context.global_throttle_count} ({self.percent_requests(context, context.global_throttle_count)}%)
+                       (Default throttling limit is 100tps; please contact Momento for a limit increase!)
     
 cumulative set latencies:
 {self.output_histogram_summary(context.set_latencies)}
@@ -195,12 +200,14 @@ cumulative get latencies:
         context: BasicPythonLoadGenContext,
         block: Callable[[], Coroutine[None, None, T]],
     ) -> Optional[T]:
-        result, response = await self.execute_request(block)
+        result, response = await self.execute_request(context, block)
         self.update_context_counts_for_request(context, result)
         return response
 
     async def execute_request(
-        self, block: Callable[[], Coroutine[None, None, T]]
+        self,
+        context: BasicPythonLoadGenContext,
+        block: Callable[[], Coroutine[None, None, T]],
     ) -> Tuple[AsyncSetGetResult, Optional[T]]:
         try:
             result = await block()
@@ -213,6 +220,15 @@ cumulative get latencies:
             # TODO need to verify exception type
             self.logger.error(f"Caught TimeoutError: {e}")
             return AsyncSetGetResult.DEADLINE_EXCEEDED, None
+        except momento.errors.LimitExceededError:
+            if context.global_throttle_count % 5_000 == 0:
+                self.logger.warning(
+                    "Received limit exceeded responses from the server."
+                )
+                self.logger.warning(
+                    "Default limit is 100tps; please contact support@momentohq.com for a limit increase!"
+                )
+            return AsyncSetGetResult.THROTTLE, None
 
     @staticmethod
     def update_context_counts_for_request(
@@ -225,6 +241,8 @@ cumulative get latencies:
             context.global_unavailable_count += 1
         elif result == AsyncSetGetResult.DEADLINE_EXCEEDED:
             context.global_deadline_exceeded_count += 1
+        elif result == AsyncSetGetResult.THROTTLE:
+            context.global_throttle_count += 1
         else:
             raise ValueError(f"Unsupported result type: {result}")
 
