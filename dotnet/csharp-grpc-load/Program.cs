@@ -7,6 +7,8 @@ enum TestMode
     Dictionary,
     Set,
     ClientUnary,
+    ClientUnaryList,
+    List,
 }
 
 class Program {

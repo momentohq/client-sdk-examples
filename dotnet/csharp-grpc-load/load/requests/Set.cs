@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using Momento.Protos.CacheClient;
 
 namespace momento_csharp_load_generator.load.requests
 {
@@ -19,11 +20,11 @@ namespace momento_csharp_load_generator.load.requests
             return setNames.GetOrAdd(i, j => Google.Protobuf.ByteString.CopyFromUtf8($"A dictionary {j}"));
         }
 
-        public static async Task Add(uint setNumber, uint elementStart, uint count, CacheClient.Scs.ScsClient client, RequestUtil util, Stats stats, CancellationToken cancellationToken)
+        public static async Task Add(uint setNumber, uint elementStart, uint count, Scs.ScsClient client, RequestUtil util, Stats stats, CancellationToken cancellationToken)
         {
             try
             {
-                var request = new CacheClient._SetUnionRequest
+                var request = new _SetUnionRequest
                 {
                     TtlMilliseconds = 60000,
                     RefreshTtl = true,
@@ -46,11 +47,11 @@ namespace momento_csharp_load_generator.load.requests
             }
         }
 
-        public static async Task Get(uint dictionaryNumber, uint fieldStart, uint count, CacheClient.Scs.ScsClient client, RequestUtil util, Stats stats, CancellationToken cancellationToken)
+        public static async Task Get(uint dictionaryNumber, uint fieldStart, uint count, Scs.ScsClient client, RequestUtil util, Stats stats, CancellationToken cancellationToken)
         {
             try
             {
-                var request = new CacheClient._SetFetchRequest
+                var request = new _SetFetchRequest
                 {
                     SetName = SetName(dictionaryNumber),
                 };
