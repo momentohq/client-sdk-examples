@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Messaging | Momento</title>
+  <style>
+    body {
+      font-family: Inter, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      background-color: #25392B;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+
+    #chat-container {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 100px);
+    }
+
+    #messages {
+      flex-grow: 1;
+      list-style-type: none;
+      margin: 0;
+      padding: 10px;
+      overflow-y: auto;
+    }
+
+    #messages li {
+      margin-bottom: 10px;
+      padding: 10px;
+      background-color: #f1f1f1;
+      border-radius: 5px;
+    }
+
+    #messages li strong {
+      font-weight: bold;
+    }
+
+    #input-container {
+      display: flex;
+      background-color: #f1f1f1;
+      padding: 10px;
+    }
+
+    input[type="text"] {
+      flex-grow: 1;
+      box-sizing: border-box;
+      border: none;
+      padding: 10px;
+      outline: none;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      font-size: 16px;
+      padding: 10px;
+      margin-left: 10px;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #user-info {
+      background-color: #f1f1f1;
+      padding: 10px;
+      font-size: 14px;
+      text-align: right;
+      color: #777;
+    }
+
+    .my-message {
+      background-color: #D2E5A8 !important;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Momento Instant Messenger⚡</h1>
+  <div id="chat-container">
+    <ul id="messages"></ul>
+    <div id="user-info"></div>
+    <div id="input-container">
+      <input type="text" id="message-input" placeholder="Type your message here" />
+      <button id="send-button">Send</button>
+    </div>
+  </div>
+  <script src="https://cdn.socket.io/4.4.0/socket.io.min.js"></script>
+  <script>
+    const socket = io('http://localhost:3000');
+
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+    const messages = document.getElementById('messages');
+    const userInfo = document.getElementById('user-info');
+
+    socket.on('connect', () => {
+      console.log('Connected to the server');
+      userInfo.textContent = `You are logged in as ${socket.id}`;
+    });
+
+    socket.on('message', (data) => {
+      const message = JSON.parse(data.chatMessage);
+      const li = document.createElement('li');
+
+      const usernameStrong = document.createElement('strong');
+      usernameStrong.textContent = `${message.username}: `;
+      li.appendChild(usernameStrong);
+
+      const messageText = document.createTextNode(message.message);
+      li.appendChild(messageText);
+
+      if (message.username == socket.id) {
+        li.classList.add('my-message');
+      }
+
+      messages.appendChild(li);
+    });
+
+    socket.on('joined', (data) => {
+      for (const message of data.chatHistory) {
+        const li = document.createElement('li');
+
+        const usernameStrong = document.createElement('strong');
+        usernameStrong.textContent = `${message.username}: `;
+        li.appendChild(usernameStrong);
+
+        const messageText = document.createTextNode(message.message);
+        li.appendChild(messageText);
+        
+        if (message.username == socket.id) {
+          li.classList.add('my-message');
+        }
+        messages.appendChild(li);
+      }
+    });
+
+    const room = 'room1';
+
+
+    socket.emit('join', { room });
+
+    sendButton.addEventListener('click', () => {
+      const message = messageInput.value;
+      if (message) {
+        socket.emit('message', { room, message });
+        messageInput.value = '';
+      }
+    });
+
+    messageInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        const message = messageInput.value;
+        if (message) {
+          socket.emit('message', { room, message });
+          messageInput.value = '';
+        }
+      }
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Disconnected from the server');
+    });
+  </script>
+</body>
+
+</html>
